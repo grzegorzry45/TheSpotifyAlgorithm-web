@@ -16,7 +16,7 @@ import uuid
 
 # Import analysis modules
 from core.audio_processor import AudioProcessor
-from core.comparator import PlaylistComparator
+from core.playlist_comparator import PlaylistComparator
 from core.track_comparator import TrackComparator
 from core.report_generator import ReportGenerator
 
