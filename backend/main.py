@@ -308,16 +308,15 @@ async def compare_single(
 
         ref_features['filename'] = reference_track.filename
 
-        # Compare tracks
-        track_comparator = TrackComparator()
-        comparison = track_comparator.compare_tracks(user_features, ref_features)
-        recommendations = track_comparator.generate_recommendations(comparison)
+        # Compare tracks (TrackComparator needs reference track in __init__)
+        track_comparator = TrackComparator(ref_features)
+        recommendations = track_comparator.compare_track(user_features)
 
         return {
             "mode": "track",
             "user_track": user_features,
             "reference_track": ref_features,
-            "comparison": comparison,
+            "comparison": recommendations,  # compare_track already returns recommendations
             "recommendations": recommendations
         }
 
