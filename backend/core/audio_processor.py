@@ -14,12 +14,12 @@ warnings.filterwarnings('ignore')
 class AudioProcessor:
     """Process audio files and extract features"""
 
-    def __init__(self, sr: int = 22050):
+    def __init__(self, sr: int = 11025):
         """
         Initialize audio processor
 
         Args:
-            sr: Sample rate for audio loading
+            sr: Sample rate for audio loading (lowered to 11025 for faster processing on free tier)
         """
         self.sr = sr
         self.meter = pyln.Meter(sr)
