@@ -1,4 +1,4 @@
-"""
+  """
   PlaylistComparator - Wrapper for Comparator class
   Creates playlist profile and compares tracks
   """
