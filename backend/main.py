@@ -402,6 +402,29 @@ async def health_check():
     return {"status": "ok", "service": "The Algorithm API"}
 
 
+@app.get("/api/test")
+async def test_endpoint():
+    """Simple test endpoint - no processing"""
+    return {
+        "status": "success",
+        "message": "Backend is working!",
+        "timestamp": "2025-12-06",
+        "test": "passed"
+    }
+
+
+@app.post("/api/test-upload")
+async def test_upload(file: UploadFile = File(...)):
+    """Test file upload without processing"""
+    return {
+        "status": "success",
+        "filename": file.filename,
+        "content_type": file.content_type,
+        "size_kb": len(await file.read()) / 1024,
+        "message": "File received successfully (not analyzed)"
+    }
+
+
 # Mount static files for frontend
 app.mount("/static", StaticFiles(directory=str(FRONTEND_DIR / "static")), name="static")
 
