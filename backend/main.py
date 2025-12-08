@@ -53,7 +53,14 @@ async def root():
     """Serve the frontend"""
     frontend_path = FRONTEND_DIR / "index.html"
     if frontend_path.exists():
-        return FileResponse(frontend_path)
+        return FileResponse(
+            frontend_path,
+            headers={
+                "Cache-Control": "no-cache, no-store, must-revalidate",
+                "Pragma": "no-cache",
+                "Expires": "0"
+            }
+        )
     return {"message": "The Algorithm API is running. Frontend not found."}
 
 
