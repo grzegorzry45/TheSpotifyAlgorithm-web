@@ -13,6 +13,9 @@ let playlistAbortController = null;
 let batchAbortController = null;
 let compareAbortController = null;
 
+// Track if any operation is in progress
+let isProcessing = false;
+
 // Initialize on page load
 document.addEventListener('DOMContentLoaded', () => {
     initializeTabs();
@@ -22,7 +25,19 @@ document.addEventListener('DOMContentLoaded', () => {
     initializeSingleCompare();
     initializeRecommendations();
     initializeCancelButtons();
+    initializeUnloadWarning();
 });
+
+// Warn user before leaving page during processing
+function initializeUnloadWarning() {
+    window.addEventListener('beforeunload', (e) => {
+        if (isProcessing) {
+            e.preventDefault();
+            e.returnValue = 'Analysis is in progress. If you leave now, you will lose all progress. Are you sure?';
+            return e.returnValue;
+        }
+    });
+}
 
 // ===== PROGRESS STAGE HELPERS =====
 function updateProgressStage(containerId, stageName, state) {
@@ -315,6 +330,7 @@ async function analyzePlaylist() {
 
     // Create new abort controller
     playlistAbortController = new AbortController();
+    isProcessing = true;
 
     analyzeBtn.disabled = true;
     progressContainer.style.display = 'block';
@@ -408,6 +424,7 @@ async function analyzePlaylist() {
     } finally {
         analyzeBtn.disabled = false;
         playlistAbortController = null;
+        isProcessing = false;
     }
 }
 
@@ -499,6 +516,7 @@ async function compareBatch() {
 
     // Create new abort controller
     batchAbortController = new AbortController();
+    isProcessing = true;
 
     compareBtn.disabled = true;
     progressContainer.style.display = 'block';
@@ -594,6 +612,7 @@ async function compareBatch() {
     } finally {
         compareBtn.disabled = false;
         batchAbortController = null;
+        isProcessing = false;
     }
 }
 
@@ -710,6 +729,7 @@ async function compareSingleTrack() {
 
     // Create new abort controller
     compareAbortController = new AbortController();
+    isProcessing = true;
 
     compareBtn.disabled = true;
     progressContainer.style.display = 'block';
@@ -812,6 +832,7 @@ async function compareSingleTrack() {
     } finally {
         compareBtn.disabled = false;
         compareAbortController = null;
+        isProcessing = false;
     }
 }
 
