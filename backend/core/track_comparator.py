@@ -46,50 +46,83 @@ class TrackComparator:
             'score': score
         })
 
-        # Core features
-        recommendations.append(self.compare_bpm(your_track['bpm']))
-        recommendations.append(self.compare_key(your_track.get('key', 'Unknown')))
-        recommendations.append(self.compare_energy(your_track['energy']))
-        recommendations.append(self.compare_loudness(your_track['loudness']))
+        # Core features - only compare if both tracks have the parameter
+        if 'bpm' in your_track and 'bpm' in self.reference:
+            recommendations.append(self.compare_bpm(your_track['bpm']))
+        if 'key' in your_track and 'key' in self.reference:
+            recommendations.append(self.compare_key(your_track.get('key', 'Unknown')))
+        if 'energy' in your_track and 'energy' in self.reference:
+            recommendations.append(self.compare_energy(your_track['energy']))
+        if 'loudness' in your_track and 'loudness' in self.reference:
+            recommendations.append(self.compare_loudness(your_track['loudness']))
 
         # Spectral features
-        recommendations.append(self.compare_brightness(your_track['spectral_centroid']))
-        recommendations.append(self.compare_spectral_rolloff(your_track.get('spectral_rolloff', 0)))
-        recommendations.append(self.compare_spectral_flatness(your_track.get('spectral_flatness', 0)))
-        recommendations.append(self.compare_spectral_contrast(your_track.get('spectral_contrast', 0)))
+        if 'spectral_centroid' in your_track and 'spectral_centroid' in self.reference:
+            recommendations.append(self.compare_brightness(your_track['spectral_centroid']))
+        if 'spectral_rolloff' in your_track and 'spectral_rolloff' in self.reference:
+            recommendations.append(self.compare_spectral_rolloff(your_track.get('spectral_rolloff', 0)))
+        if 'spectral_flatness' in your_track and 'spectral_flatness' in self.reference:
+            recommendations.append(self.compare_spectral_flatness(your_track.get('spectral_flatness', 0)))
+        if 'spectral_contrast' in your_track and 'spectral_contrast' in self.reference:
+            recommendations.append(self.compare_spectral_contrast(your_track.get('spectral_contrast', 0)))
 
         # Energy distribution
-        recommendations.append(self.compare_low_energy(your_track.get('low_energy', 0)))
-        recommendations.append(self.compare_mid_energy(your_track.get('mid_energy', 0)))
-        recommendations.append(self.compare_high_energy(your_track.get('high_energy', 0)))
-        recommendations.append(self.compare_sub_bass(your_track.get('sub_bass_presence', 0)))
+        if 'low_energy' in your_track and 'low_energy' in self.reference:
+            recommendations.append(self.compare_low_energy(your_track.get('low_energy', 0)))
+        if 'mid_energy' in your_track and 'mid_energy' in self.reference:
+            recommendations.append(self.compare_mid_energy(your_track.get('mid_energy', 0)))
+        if 'high_energy' in your_track and 'high_energy' in self.reference:
+            recommendations.append(self.compare_high_energy(your_track.get('high_energy', 0)))
+        if 'sub_bass_presence' in your_track and 'sub_bass_presence' in self.reference:
+            recommendations.append(self.compare_sub_bass(your_track.get('sub_bass_presence', 0)))
 
         # Dynamics & Loudness
-        recommendations.append(self.compare_dynamic_range(your_track.get('dynamic_range', 0)))
-        recommendations.append(self.compare_rms(your_track['rms']))
-        recommendations.append(self.compare_loudness_range(your_track.get('loudness_range', 0)))
-        recommendations.append(self.compare_true_peak(your_track.get('true_peak', 0)))
-        recommendations.append(self.compare_crest_factor(your_track.get('crest_factor', 0)))
+        if 'dynamic_range' in your_track and 'dynamic_range' in self.reference:
+            recommendations.append(self.compare_dynamic_range(your_track.get('dynamic_range', 0)))
+        if 'rms' in your_track and 'rms' in self.reference:
+            recommendations.append(self.compare_rms(your_track['rms']))
+        if 'loudness_range' in your_track and 'loudness_range' in self.reference:
+            recommendations.append(self.compare_loudness_range(your_track.get('loudness_range', 0)))
+        if 'true_peak' in your_track and 'true_peak' in self.reference:
+            recommendations.append(self.compare_true_peak(your_track.get('true_peak', 0)))
+        if 'crest_factor' in your_track and 'crest_factor' in self.reference:
+            recommendations.append(self.compare_crest_factor(your_track.get('crest_factor', 0)))
 
         # Perceptual features
-        recommendations.append(self.compare_danceability(your_track.get('danceability', 0)))
-        recommendations.append(self.compare_beat_strength(your_track.get('beat_strength', 0)))
-        recommendations.append(self.compare_valence(your_track.get('valence', 0)))
-        recommendations.append(self.compare_stereo_width(your_track.get('stereo_width', 0)))
-        recommendations.append(self.compare_transient_energy(your_track.get('transient_energy', 0)))
-        recommendations.append(self.compare_harmonic_to_noise(your_track.get('harmonic_to_noise_ratio', 0)))
+        if 'danceability' in your_track and 'danceability' in self.reference:
+            recommendations.append(self.compare_danceability(your_track.get('danceability', 0)))
+        if 'beat_strength' in your_track and 'beat_strength' in self.reference:
+            recommendations.append(self.compare_beat_strength(your_track.get('beat_strength', 0)))
+        if 'valence' in your_track and 'valence' in self.reference:
+            recommendations.append(self.compare_valence(your_track.get('valence', 0)))
+        if 'stereo_width' in your_track and 'stereo_width' in self.reference:
+            recommendations.append(self.compare_stereo_width(your_track.get('stereo_width', 0)))
+        if 'transient_energy' in your_track and 'transient_energy' in self.reference:
+            recommendations.append(self.compare_transient_energy(your_track.get('transient_energy', 0)))
+        if 'harmonic_to_noise_ratio' in your_track and 'harmonic_to_noise_ratio' in self.reference:
+            recommendations.append(self.compare_harmonic_to_noise(your_track.get('harmonic_to_noise_ratio', 0)))
 
         # Composition & Arrangement features
-        recommendations.append(self.compare_harmonic_complexity(your_track.get('harmonic_complexity', 0)))
-        recommendations.append(self.compare_melodic_range(your_track.get('melodic_range', 0)))
-        recommendations.append(self.compare_rhythmic_density(your_track.get('rhythmic_density', 0)))
-        recommendations.append(self.compare_arrangement_density(your_track.get('arrangement_density', 0)))
-        recommendations.append(self.compare_repetition_score(your_track.get('repetition_score', 0)))
-        recommendations.append(self.compare_frequency_occupancy(your_track.get('frequency_occupancy', 0)))
-        recommendations.append(self.compare_timbral_diversity(your_track.get('timbral_diversity', 0)))
-        recommendations.append(self.compare_vocal_instrumental(your_track.get('vocal_instrumental_ratio', 0)))
-        recommendations.append(self.compare_energy_curve(your_track.get('energy_curve', 0)))
-        recommendations.append(self.compare_call_response(your_track.get('call_response_presence', 0)))
+        if 'harmonic_complexity' in your_track and 'harmonic_complexity' in self.reference:
+            recommendations.append(self.compare_harmonic_complexity(your_track.get('harmonic_complexity', 0)))
+        if 'melodic_range' in your_track and 'melodic_range' in self.reference:
+            recommendations.append(self.compare_melodic_range(your_track.get('melodic_range', 0)))
+        if 'rhythmic_density' in your_track and 'rhythmic_density' in self.reference:
+            recommendations.append(self.compare_rhythmic_density(your_track.get('rhythmic_density', 0)))
+        if 'arrangement_density' in your_track and 'arrangement_density' in self.reference:
+            recommendations.append(self.compare_arrangement_density(your_track.get('arrangement_density', 0)))
+        if 'repetition_score' in your_track and 'repetition_score' in self.reference:
+            recommendations.append(self.compare_repetition_score(your_track.get('repetition_score', 0)))
+        if 'frequency_occupancy' in your_track and 'frequency_occupancy' in self.reference:
+            recommendations.append(self.compare_frequency_occupancy(your_track.get('frequency_occupancy', 0)))
+        if 'timbral_diversity' in your_track and 'timbral_diversity' in self.reference:
+            recommendations.append(self.compare_timbral_diversity(your_track.get('timbral_diversity', 0)))
+        if 'vocal_instrumental_ratio' in your_track and 'vocal_instrumental_ratio' in self.reference:
+            recommendations.append(self.compare_vocal_instrumental(your_track.get('vocal_instrumental_ratio', 0)))
+        if 'energy_curve' in your_track and 'energy_curve' in self.reference:
+            recommendations.append(self.compare_energy_curve(your_track.get('energy_curve', 0)))
+        if 'call_response_presence' in your_track and 'call_response_presence' in self.reference:
+            recommendations.append(self.compare_call_response(your_track.get('call_response_presence', 0)))
 
         return recommendations
 

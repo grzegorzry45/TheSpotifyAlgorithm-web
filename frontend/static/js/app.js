@@ -143,122 +143,18 @@ function initializeTabs() {
 }
 
 // ===== PARAMETER SELECTION =====
-const PARAM_PRESETS = {
-    essential: [],
-    standard: ['spectral_rolloff', 'spectral_flatness', 'zero_crossing_rate', 'low_energy', 'mid_energy', 'high_energy'],
-    advanced: ['spectral_rolloff', 'spectral_flatness', 'zero_crossing_rate', 'low_energy', 'mid_energy', 'high_energy',
-               'danceability', 'beat_strength', 'sub_bass_presence', 'stereo_width', 'valence', 'key_confidence'],
-    full: ['spectral_rolloff', 'spectral_flatness', 'zero_crossing_rate', 'low_energy', 'mid_energy', 'high_energy',
-           'danceability', 'beat_strength', 'sub_bass_presence', 'stereo_width', 'valence', 'key_confidence',
-           'loudness_range', 'true_peak', 'crest_factor', 'spectral_contrast', 'transient_energy', 'harmonic_to_noise_ratio',
-           'harmonic_complexity', 'melodic_range', 'rhythmic_density', 'arrangement_density', 'repetition_score',
-           'frequency_occupancy', 'timbral_diversity', 'vocal_instrumental_ratio', 'energy_curve', 'call_response_presence'],
-    custom: []
-};
-
 function initializeParameterSelection() {
-    // Initialize for Analyze Playlist tab
-    const presetBtns = document.querySelectorAll('.preset-btn');
-    const paramGroups = document.getElementById('param-groups');
-    const checkboxes = document.querySelectorAll('input[name="param"]');
-
-    // Preset button handlers
-    presetBtns.forEach(btn => {
-        btn.addEventListener('click', () => {
-            const preset = btn.dataset.preset;
-
-            // Update active button
-            presetBtns.forEach(b => b.classList.remove('active'));
-            btn.classList.add('active');
-
-            // Show/hide custom checkboxes
-            if (preset === 'custom') {
-                paramGroups.style.display = 'block';
-            } else {
-                paramGroups.style.display = 'none';
-                applyPreset(preset, 'param');
-            }
-        });
-    });
-
-    // Checkbox change handler - switch to custom when user clicks
-    checkboxes.forEach(checkbox => {
-        checkbox.addEventListener('change', () => {
-            presetBtns.forEach(b => b.classList.remove('active'));
-            document.querySelector('[data-preset="custom"]').classList.add('active');
-            paramGroups.style.display = 'block';
-        });
-    });
-
-    // Initialize for Compare tab
-    const presetBtnsCompare = document.querySelectorAll('.preset-btn-compare');
-    const paramGroupsCompare = document.getElementById('param-groups-compare');
-    const checkboxesCompare = document.querySelectorAll('input[name="param-compare"]');
-
-    // Preset button handlers for Compare
-    presetBtnsCompare.forEach(btn => {
-        btn.addEventListener('click', () => {
-            const preset = btn.dataset.preset;
-
-            // Update active button
-            presetBtnsCompare.forEach(b => b.classList.remove('active'));
-            btn.classList.add('active');
-
-            // Show/hide custom checkboxes
-            if (preset === 'custom') {
-                paramGroupsCompare.style.display = 'block';
-            } else {
-                paramGroupsCompare.style.display = 'none';
-                applyPreset(preset, 'param-compare');
-            }
-        });
-    });
-
-    // Checkbox change handler - switch to custom when user clicks
-    checkboxesCompare.forEach(checkbox => {
-        checkbox.addEventListener('change', () => {
-            presetBtnsCompare.forEach(b => b.classList.remove('active'));
-            const customBtn = document.querySelector('.preset-btn-compare[data-preset="custom"]');
-            if (customBtn) customBtn.classList.add('active');
-            paramGroupsCompare.style.display = 'block';
-        });
-    });
-}
-
-function applyPreset(preset, checkboxName) {
-    const params = PARAM_PRESETS[preset];
-    const checkboxes = document.querySelectorAll(`input[name="${checkboxName}"]`);
-
-    checkboxes.forEach(checkbox => {
-        checkbox.checked = params.includes(checkbox.value);
-    });
+    // No initialization needed - users select parameters directly via checkboxes
 }
 
 function getSelectedParameters() {
-    const activePreset = document.querySelector('.preset-btn.active').dataset.preset;
-
-    if (activePreset !== 'custom') {
-        return PARAM_PRESETS[activePreset];
-    }
-
-    // Custom selection
+    // Get checked parameters from Analyze Playlist tab
     const checkboxes = document.querySelectorAll('input[name="param"]:checked');
     return Array.from(checkboxes).map(cb => cb.value);
 }
 
 function getSelectedParametersCompare() {
-    const activePreset = document.querySelector('.preset-btn-compare.active');
-    if (!activePreset) {
-        return [];
-    }
-
-    const preset = activePreset.dataset.preset;
-
-    if (preset !== 'custom') {
-        return PARAM_PRESETS[preset];
-    }
-
-    // Custom selection
+    // Get checked parameters from Compare tab
     const checkboxes = document.querySelectorAll('input[name="param-compare"]:checked');
     return Array.from(checkboxes).map(cb => cb.value);
 }
@@ -844,33 +740,96 @@ function displaySingleComparison(data) {
     const userTrack = data.user_track;
     const refData = data.mode === 'playlist' ? data.playlist_profile : data.reference_track;
 
-    // Create comparison rows for key parameters
-    const params = [
-        { key: 'bpm', label: 'BPM', format: (v) => v.toFixed(1) },
-        { key: 'energy', label: 'Energy', format: (v) => v.toFixed(2) },
-        { key: 'loudness', label: 'Loudness', format: (v) => v.toFixed(1) + ' LUFS' },
-        { key: 'spectral_centroid', label: 'Brightness', format: (v) => v.toFixed(0) + ' Hz' },
-        { key: 'dynamic_range', label: 'Dynamic Range', format: (v) => v.toFixed(1) + ' dB' },
-        { key: 'danceability', label: 'Danceability', format: (v) => v.toFixed(2) },
-    ];
+    // Complete parameter mapping with labels and formatters
+    const parameterMap = {
+        // Core parameters
+        'bpm': { label: 'BPM', format: (v) => v.toFixed(1) },
+        'energy': { label: 'Energy', format: (v) => v.toFixed(2) },
+        'loudness': { label: 'Loudness', format: (v) => v.toFixed(1) + ' LUFS' },
+        'spectral_centroid': { label: 'Brightness', format: (v) => v.toFixed(0) + ' Hz' },
+        'dynamic_range': { label: 'Dynamic Range', format: (v) => v.toFixed(1) + ' dB' },
 
-    params.forEach(param => {
-        if (userTrack[param.key] !== undefined && refData[param.key] !== undefined) {
-            const diff = userTrack[param.key] - refData[param.key];
-            const diffPercent = (diff / refData[param.key] * 100).toFixed(1);
+        // Tier 1: Spectral
+        'spectral_rolloff': { label: 'Spectral Rolloff', format: (v) => v.toFixed(0) + ' Hz' },
+        'spectral_flatness': { label: 'Spectral Flatness', format: (v) => v.toFixed(3) },
+        'zero_crossing_rate': { label: 'Zero Crossing Rate', format: (v) => v.toFixed(0) },
 
-            const row = document.createElement('div');
-            row.className = 'comparison-row';
-            row.innerHTML = `
-                <div class="param-name">${param.label}</div>
-                <div class="param-value">Your: ${param.format(userTrack[param.key])}</div>
-                <div class="param-value">Target: ${param.format(refData[param.key])}</div>
-                <div class="param-diff ${diff > 0 ? 'positive' : 'negative'}">
-                    ${diff > 0 ? '+' : ''}${diffPercent}%
-                </div>
-            `;
-            container.appendChild(row);
+        // Tier 1B: Energy Distribution
+        'low_energy': { label: 'Low Energy', format: (v) => (v * 100).toFixed(1) + '%' },
+        'mid_energy': { label: 'Mid Energy', format: (v) => (v * 100).toFixed(1) + '%' },
+        'high_energy': { label: 'High Energy', format: (v) => (v * 100).toFixed(1) + '%' },
+
+        // Tier 2: Perceptual
+        'danceability': { label: 'Danceability', format: (v) => v.toFixed(2) },
+        'beat_strength': { label: 'Beat Strength', format: (v) => v.toFixed(2) },
+        'sub_bass_presence': { label: 'Sub-Bass Presence', format: (v) => v.toFixed(2) },
+        'stereo_width': { label: 'Stereo Width', format: (v) => v.toFixed(2) },
+        'valence': { label: 'Valence (Mood)', format: (v) => v.toFixed(2) },
+        'key_confidence': { label: 'Key Confidence', format: (v) => v.toFixed(2) },
+
+        // Tier 3: Production
+        'loudness_range': { label: 'Loudness Range (LRA)', format: (v) => v.toFixed(1) + ' LU' },
+        'true_peak': { label: 'True Peak', format: (v) => v.toFixed(1) + ' dBTP' },
+        'crest_factor': { label: 'Crest Factor', format: (v) => v.toFixed(1) + ' dB' },
+        'spectral_contrast': { label: 'Spectral Contrast', format: (v) => v.toFixed(2) },
+        'transient_energy': { label: 'Transient Energy', format: (v) => v.toFixed(2) },
+        'harmonic_to_noise_ratio': { label: 'Harmonic/Noise Ratio', format: (v) => v.toFixed(1) + ' dB' },
+
+        // Tier 4: Compositional
+        'harmonic_complexity': { label: 'Harmonic Complexity', format: (v) => v.toFixed(2) },
+        'melodic_range': { label: 'Melodic Range', format: (v) => v.toFixed(0) + ' semitones' },
+        'rhythmic_density': { label: 'Rhythmic Density', format: (v) => v.toFixed(2) },
+        'arrangement_density': { label: 'Arrangement Density', format: (v) => v.toFixed(2) },
+        'repetition_score': { label: 'Repetition Score', format: (v) => v.toFixed(2) },
+        'frequency_occupancy': { label: 'Frequency Occupancy', format: (v) => (v * 100).toFixed(1) + '%' },
+        'timbral_diversity': { label: 'Timbral Diversity', format: (v) => v.toFixed(2) },
+        'vocal_instrumental_ratio': { label: 'Vocal/Instrumental', format: (v) => v.toFixed(2) },
+        'energy_curve': { label: 'Energy Curve', format: (v) => v.toFixed(2) },
+        'call_response_presence': { label: 'Call-Response', format: (v) => v.toFixed(2) }
+    };
+
+    // Find all numeric parameters that exist in both tracks
+    const displayedParams = [];
+
+    // First add the core parameters if they exist
+    const coreOrder = ['bpm', 'energy', 'loudness', 'spectral_centroid', 'dynamic_range', 'danceability'];
+    coreOrder.forEach(key => {
+        if (userTrack[key] !== undefined && refData[key] !== undefined && typeof userTrack[key] === 'number') {
+            displayedParams.push(key);
         }
+    });
+
+    // Then add all other parameters that exist in both tracks
+    Object.keys(parameterMap).forEach(key => {
+        if (!coreOrder.includes(key) &&
+            userTrack[key] !== undefined &&
+            refData[key] !== undefined &&
+            typeof userTrack[key] === 'number') {
+            displayedParams.push(key);
+        }
+    });
+
+    // Display all found parameters
+    displayedParams.forEach(key => {
+        const param = parameterMap[key];
+        if (!param) return;
+
+        const userVal = userTrack[key];
+        const refVal = refData[key];
+        const diff = userVal - refVal;
+        const diffPercent = refVal !== 0 ? (diff / refVal * 100).toFixed(1) : '0.0';
+
+        const row = document.createElement('div');
+        row.className = 'comparison-row';
+        row.innerHTML = `
+            <div class="param-name">${param.label}</div>
+            <div class="param-value">Your: ${param.format(userVal)}</div>
+            <div class="param-value">Target: ${param.format(refVal)}</div>
+            <div class="param-diff ${diff > 0 ? 'positive' : 'negative'}">
+                ${diff > 0 ? '+' : ''}${diffPercent}%
+            </div>
+        `;
+        container.appendChild(row);
     });
 
     // Display recommendations if available

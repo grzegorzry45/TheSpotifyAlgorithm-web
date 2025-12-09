@@ -257,8 +257,13 @@ async def compare_single(
     if additional_params:
         try:
             params_list = json.loads(additional_params)
+            print(f"DEBUG: Received additional_params: {additional_params}")
+            print(f"DEBUG: Parsed params_list: {params_list}")
         except json.JSONDecodeError:
+            print(f"DEBUG: Failed to parse additional_params: {additional_params}")
             params_list = []
+    else:
+        print(f"DEBUG: No additional_params received")
 
     # For track mode, create temporary session if needed
     if mode == "track":

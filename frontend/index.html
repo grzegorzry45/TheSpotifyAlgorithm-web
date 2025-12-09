@@ -4,13 +4,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>THE ALGORITHM</title>
-    <link rel="stylesheet" href="/static/css/style.css?v=1765238717">
+    <link rel="stylesheet" href="/static/css/style.css?v=1765291100">
 </head>
 <body>
     <!-- Header -->
     <header class="header">
         <div class="header-content">
-            <h1 class="main-title">THE ALGORITHM <span style="font-size: 0.4em; opacity: 0.7; margin-left: 10px;">v8</span></h1>
+            <h1 class="main-title">THE ALGORITHM <span style="font-size: 0.4em; opacity: 0.7; margin-left: 10px;">v11</span></h1>
             <p class="subtitle">&gt; Decode Spotify's DNA. Understand what makes music succeed.</p>
             <p class="status">█ System ready for analysis</p>
         </div>
@@ -39,17 +39,9 @@
                 <!-- Parameter Selection -->
                 <div class="parameter-selection">
                     <h3>Select Analysis Parameters</h3>
-                    <p class="param-hint">More parameters = slower analysis. Default includes essential features (~5-10s/track)</p>
+                    <p class="param-hint">Choose which parameters to analyze. More parameters = slower analysis (~5-80s/track depending on selection)</p>
 
-                    <div class="param-presets">
-                        <button class="preset-btn active" data-preset="essential">Essential (Fast)</button>
-                        <button class="preset-btn" data-preset="standard">Standard</button>
-                        <button class="preset-btn" data-preset="advanced">Advanced</button>
-                        <button class="preset-btn" data-preset="full">Full Analysis</button>
-                        <button class="preset-btn" data-preset="custom">Custom</button>
-                    </div>
-
-                    <div class="param-groups" id="param-groups" style="display: none;">
+                    <div class="param-groups" id="param-groups">
                         <div class="param-group">
                             <h4>🎵 Tier 1: Spectral (Fast) <span class="param-time">+3-5s</span></h4>
                             <label><input type="checkbox" name="param" value="spectral_rolloff"> Spectral Rolloff</label>
@@ -219,17 +211,9 @@
                 <!-- Parameter Selection for Compare -->
                 <div class="parameter-selection">
                     <h3>Select Analysis Parameters</h3>
-                    <p class="param-hint">More parameters = slower analysis. Default includes essential features (~5-10s/track)</p>
+                    <p class="param-hint">Choose which parameters to analyze. More parameters = slower analysis (~5-80s/track depending on selection)</p>
 
-                    <div class="param-presets">
-                        <button class="preset-btn-compare active" data-preset="essential">Essential (Fast)</button>
-                        <button class="preset-btn-compare" data-preset="standard">Standard</button>
-                        <button class="preset-btn-compare" data-preset="advanced">Advanced</button>
-                        <button class="preset-btn-compare" data-preset="full">Full Analysis</button>
-                        <button class="preset-btn-compare" data-preset="custom">Custom</button>
-                    </div>
-
-                    <div class="param-groups" id="param-groups-compare" style="display: none;">
+                    <div class="param-groups" id="param-groups-compare">
                         <div class="param-group">
                             <h4>🎵 Tier 1: Spectral (Fast) <span class="param-time">+3-5s</span></h4>
                             <label><input type="checkbox" name="param-compare" value="spectral_rolloff"> Spectral Rolloff</label>
@@ -367,6 +351,6 @@
         <span id="has-playlist-profile">false</span>
     </div>
 
-    <script src="/static/js/app.js?v=1765238717"></script>
+    <script src="/static/js/app.js?v=1765291100"></script>
 </body>
 </html>
