@@ -20,8 +20,11 @@ COPY frontend/ ./frontend/
 # Create necessary directories
 RUN mkdir -p backend/uploads backend/reports
 
-# Expose port (Fly.io will set PORT env var)
+# Set working directory to backend
+WORKDIR /app/backend
+
+# Expose port (Railway will set PORT env var)
 EXPOSE 8080
 
 # Run the application
-CMD cd backend && uvicorn main:app --host 0.0.0.0 --port ${PORT:-8080}
+CMD ["sh", "-c", "uvicorn main:app --host 0.0.0.0 --port ${PORT:-8080}"]
