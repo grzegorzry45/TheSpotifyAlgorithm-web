@@ -122,7 +122,23 @@ function initializeAuthUI() {
         console.log("Login button clicked");
         if(loginModal) {
             console.log("Opening Login Modal. Current display:", loginModal.style.display);
+            
+            // EMERGENCY DEBUG STYLES
             loginModal.style.display = 'flex';
+            loginModal.style.visibility = 'visible';
+            loginModal.style.opacity = '1';
+            loginModal.style.position = 'fixed';
+            loginModal.style.top = '0';
+            loginModal.style.left = '0';
+            loginModal.style.width = '100vw';
+            loginModal.style.height = '100vh';
+            loginModal.style.zIndex = '999999';
+            // loginModal.style.backgroundColor = 'rgba(255, 0, 0, 0.5)'; // Visual confirm test
+            
+            // Log geometry
+            const rect = loginModal.getBoundingClientRect();
+            console.log("Modal Geometry:", rect);
+            
             // Force redraw/check
             setTimeout(() => {
                  console.log("Modal display after set:", getComputedStyle(loginModal).display);
