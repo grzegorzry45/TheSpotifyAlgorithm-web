@@ -444,6 +444,33 @@ async def download_report(session_id: str):
     )
 
 
+@app.post("/api/preset/load")
+async def load_preset(request: dict):
+    """
+    Load preset data from frontend localStorage into backend session
+    This allows comparing tracks against saved presets
+    """
+    profile = request.get("profile")
+    analysis = request.get("analysis", [])
+
+    if not profile:
+        raise HTTPException(status_code=400, detail="No profile data provided")
+
+    # Create new session with preset data
+    session_id = "preset_" + str(uuid.uuid4())
+    sessions[session_id] = {
+        "playlist_files": [],
+        "user_files": [],
+        "playlist_profile": profile,
+        "playlist_analysis": analysis
+    }
+
+    return {
+        "session_id": session_id,
+        "message": "Preset loaded successfully"
+    }
+
+
 @app.delete("/api/session/{session_id}")
 async def cleanup_session(session_id: str):
     """

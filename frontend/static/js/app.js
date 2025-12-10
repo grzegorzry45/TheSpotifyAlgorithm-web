@@ -1351,32 +1351,53 @@ window.loadPreset = function(presetId) {
 };
 
 // Load preset for Compare tab
-window.loadPresetForCompare = function(presetId) {
+window.loadPresetForCompare = async function(presetId) {
     const preset = PresetManager.get(presetId);
     if (!preset) {
         showError('Preset not found');
         return;
     }
 
-    // Load profile into current session
-    sessionId = 'preset_' + Date.now();
-    currentPlaylistProfile = preset.profile;
-    currentPlaylistAnalysis = preset.analysis || [];
+    try {
+        // Create backend session with preset data
+        const response = await fetch(`${API_BASE}/api/preset/load`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                profile: preset.profile,
+                analysis: preset.analysis || []
+            })
+        });
 
-    document.getElementById('session-id').textContent = sessionId;
-    document.getElementById('has-playlist-profile').textContent = 'true';
+        if (!response.ok) {
+            throw new Error('Failed to load preset in backend');
+        }
 
-    // Show active preset indicator
-    const activeInfo = document.getElementById('active-preset-info');
-    const activeName = document.getElementById('active-preset-name');
-    activeName.textContent = preset.name;
-    activeInfo.style.display = 'flex';
+        const data = await response.json();
 
-    // Store active preset id
-    window.activePresetId = preset.id;
-    window.activePresetName = preset.name;
+        // Load profile into current session
+        sessionId = data.session_id;
+        currentPlaylistProfile = preset.profile;
+        currentPlaylistAnalysis = preset.analysis || [];
 
-    showSuccess(`Loaded preset: ${preset.name}`);
+        document.getElementById('session-id').textContent = sessionId;
+        document.getElementById('has-playlist-profile').textContent = 'true';
+
+        // Show active preset indicator
+        const activeInfo = document.getElementById('active-preset-info');
+        const activeName = document.getElementById('active-preset-name');
+        activeName.textContent = preset.name;
+        activeInfo.style.display = 'flex';
+
+        // Store active preset id
+        window.activePresetId = preset.id;
+        window.activePresetName = preset.name;
+
+        showSuccess(`Loaded preset: ${preset.name}`);
+    } catch (error) {
+        console.error('Error loading preset:', error);
+        showError('Failed to load preset: ' + error.message);
+    }
 };
 
 // Clear active preset
