@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Hit Algorithm - Simple Track Comparison</title>
+    <link rel="stylesheet" href="/static/css/style.css?v=1765291200">
+    <link rel="stylesheet" href="/static/css/wizard.css?v=1">
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="header-content">
+            <h1 class="main-title">THE HIT ALGORITHM</h1>
+            <p class="subtitle">COMPARE YOUR TRACK IN 3 SIMPLE STEPS</p>
+            <p class="status">Public Beta v.2.0 - Simplified Interface</p>
+        </div>
+    </header>
+
+    <!-- Progress Indicator -->
+    <div class="wizard-progress">
+        <div class="progress-step active" data-step="1">
+            <div class="step-number">1</div>
+            <div class="step-label">Choose Reference</div>
+        </div>
+        <div class="progress-connector"></div>
+        <div class="progress-step" data-step="2">
+            <div class="step-number">2</div>
+            <div class="step-label">Upload Your Track</div>
+        </div>
+        <div class="progress-connector"></div>
+        <div class="progress-step" data-step="3">
+            <div class="step-number">3</div>
+            <div class="step-label">Get Recommendations</div>
+        </div>
+    </div>
+
+    <!-- Main Wizard Container -->
+    <div class="wizard-container">
+
+        <!-- STEP 1: CHOOSE REFERENCE -->
+        <div class="wizard-step active" id="step-1">
+            <div class="step-header">
+                <h2>STEP 1: Choose Your Reference</h2>
+                <p class="step-description">How do you want to define the target sound you're comparing against?</p>
+            </div>
+
+            <div class="reference-options">
+                <!-- Option 1: Create Playlist -->
+                <div class="reference-card" data-reference="playlist">
+                    <div class="card-icon">🎵</div>
+                    <h3>Create Playlist Profile</h3>
+                    <p>Analyze 2-30 tracks to create a sonic profile based on multiple songs</p>
+                    <div class="card-benefits">
+                        <span class="benefit">✓ Most accurate</span>
+                        <span class="benefit">✓ Captures playlist vibe</span>
+                    </div>
+                    <button class="btn btn-primary select-reference-btn">Select This Option</button>
+                </div>
+
+                <!-- Option 2: Load Preset -->
+                <div class="reference-card" data-reference="preset">
+                    <div class="card-icon">💾</div>
+                    <h3>Load Saved Preset</h3>
+                    <p>Use a previously analyzed playlist profile you've saved</p>
+                    <div class="card-benefits">
+                        <span class="benefit">✓ Instant</span>
+                        <span class="benefit">✓ No re-analysis needed</span>
+                    </div>
+                    <button class="btn btn-primary select-reference-btn">Select This Option</button>
+                </div>
+
+                <!-- Option 3: Single Track -->
+                <div class="reference-card" data-reference="single">
+                    <div class="card-icon">🎧</div>
+                    <h3>Single Reference Track</h3>
+                    <p>Compare your track directly against one reference song (1:1 comparison)</p>
+                    <div class="card-benefits">
+                        <span class="benefit">✓ Fast & simple</span>
+                        <span class="benefit">✓ Direct comparison</span>
+                    </div>
+                    <button class="btn btn-primary select-reference-btn">Select This Option</button>
+                </div>
+            </div>
+
+            <!-- Expandable sections for each option -->
+            <div id="playlist-upload-section" class="reference-upload-section" style="display: none;">
+                <h3>📁 Upload Playlist Tracks (2-30 files)</h3>
+                <div class="upload-zone" id="playlist-upload">
+                    <div class="upload-icon">📁</div>
+                    <h4>Drag & Drop Playlist Files</h4>
+                    <p>or click to browse</p>
+                    <p class="file-types">Supported: MP3, WAV, FLAC</p>
+                    <input type="file" id="playlist-files" multiple accept=".mp3,.wav,.flac" style="display: none;">
+                </div>
+                <div id="playlist-file-list" class="file-list"></div>
+                <button id="analyze-playlist-btn" class="btn btn-secondary" disabled>Analyze Playlist →</button>
+                <div id="playlist-progress" class="progress-container" style="display: none;">
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="playlist-progress-fill"></div>
+                    </div>
+                    <p class="progress-text" id="playlist-progress-text">Processing...</p>
+                </div>
+            </div>
+
+            <div id="preset-load-section" class="reference-upload-section" style="display: none;">
+                <h3>📂 Select a Saved Preset</h3>
+                <div id="preset-list-display" class="preset-list">
+                    <p class="placeholder">No presets saved yet</p>
+                </div>
+                <button id="import-preset-wizard-btn" class="btn btn-secondary">📥 Import Preset File</button>
+                <input type="file" id="import-preset-wizard-file" accept=".json" style="display: none;">
+            </div>
+
+            <div id="single-upload-section" class="reference-upload-section" style="display: none;">
+                <h3>🎼 Upload Reference Track</h3>
+                <div class="upload-zone small" id="reference-track-upload">
+                    <div class="upload-icon">🎼</div>
+                    <p>Drop reference track here</p>
+                    <input type="file" id="reference-track-file" accept=".mp3,.wav,.flac" style="display: none;">
+                </div>
+                <div id="reference-track-name" class="track-name-container"></div>
+                <button id="confirm-reference-btn" class="btn btn-secondary" disabled>Confirm Reference →</button>
+            </div>
+        </div>
+
+        <!-- STEP 2: UPLOAD YOUR TRACK -->
+        <div class="wizard-step" id="step-2" style="display: none;">
+            <div class="step-header">
+                <h2>STEP 2: Upload Your Track</h2>
+                <p class="step-description">Now upload the track you want to analyze and compare</p>
+            </div>
+
+            <div class="upload-zone large" id="user-track-upload">
+                <div class="upload-icon">🎵</div>
+                <h3>Drag & Drop Your Track Here</h3>
+                <p>or click to browse</p>
+                <p class="file-types">Supported: MP3, WAV, FLAC</p>
+                <input type="file" id="user-track-file" accept=".mp3,.wav,.flac" style="display: none;">
+            </div>
+
+            <div id="user-track-name" class="track-name-container"></div>
+
+            <!-- Parameter Selection -->
+            <div class="parameter-selection-wizard">
+                <h3 class="collapsible-header active" data-target="wizard-params-content">
+                    Select Parameters to Analyze <span class="collapse-icon">▼</span>
+                </h3>
+                <div id="wizard-params-content" class="collapsible-content">
+                    <p class="param-hint">Choose which audio parameters to compare. More parameters = longer analysis time.</p>
+
+                    <div class="param-quick-select">
+                        <button class="btn btn-secondary btn-small" id="select-essential">Essential Only (Fast)</button>
+                        <button class="btn btn-secondary btn-small" id="select-all-params">All Parameters (Thorough)</button>
+                    </div>
+
+                    <div class="param-groups" id="wizard-param-groups">
+                        <!-- Will be populated by JavaScript -->
+                    </div>
+                </div>
+            </div>
+
+            <div class="wizard-navigation">
+                <button class="btn btn-secondary" id="back-to-step-1">← Back</button>
+                <button class="btn btn-primary" id="compare-now-btn" disabled>Compare Now →</button>
+            </div>
+
+            <div id="comparison-progress" class="progress-container" style="display: none;">
+                <div class="progress-bar">
+                    <div class="progress-fill" id="comparison-progress-fill"></div>
+                </div>
+                <p class="progress-text" id="comparison-progress-text">Analyzing...</p>
+            </div>
+        </div>
+
+        <!-- STEP 3: RESULTS & RECOMMENDATIONS -->
+        <div class="wizard-step" id="step-3" style="display: none;">
+            <div class="step-header">
+                <h2>STEP 3: Results & AI Recommendations</h2>
+                <p class="step-description">Here's how your track compares and what you can improve</p>
+            </div>
+
+            <div id="results-container" class="results-container">
+                <!-- Results will be populated by JavaScript -->
+                <div class="results-summary">
+                    <h3>📊 Comparison Summary</h3>
+                    <div id="comparison-summary"></div>
+                </div>
+
+                <div class="recommendations-section">
+                    <h3>💡 AI Recommendations</h3>
+                    <p class="recommendations-intro">Based on the analysis, here's what you can improve:</p>
+                    <div id="ai-recommendations"></div>
+                </div>
+            </div>
+
+            <div class="wizard-navigation">
+                <button class="btn btn-secondary" id="start-over-btn">🔄 Start Over</button>
+                <button class="btn btn-primary" id="export-report-btn">📄 Export Report</button>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Session Data (hidden) -->
+    <div id="session-data" style="display: none;">
+        <span id="session-id"></span>
+        <span id="wizard-reference-type"></span>
+        <span id="wizard-reference-ready">false</span>
+    </div>
+
+    <script src="/static/js/wizard.js?v=1"></script>
+</body>
+</html>
