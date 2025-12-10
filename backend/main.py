@@ -70,10 +70,10 @@ async def upload_playlist(files: List[UploadFile] = File(...)):
     Upload playlist files for analysis
     Returns session_id for tracking
     """
-    if len(files) < 15 or len(files) > 30:
+    if len(files) < 2 or len(files) > 30:
         raise HTTPException(
             status_code=400,
-            detail="Please upload 15-30 tracks for accurate analysis"
+            detail="Please upload 2-30 tracks for analysis"
         )
 
     # Create session

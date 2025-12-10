@@ -163,7 +163,7 @@ function initializeParameterSelection() {
 function updateAnalyzeButtonState() {
     const analyzeBtn = document.getElementById('analyze-playlist-btn');
     const selectedParams = getSelectedParameters();
-    const hasFiles = playlistFiles.length >= 15 && playlistFiles.length <= 30;
+    const hasFiles = playlistFiles.length >= 2 && playlistFiles.length <= 30;
     const hasParams = selectedParams.length > 0;
 
     analyzeBtn.disabled = !hasFiles || !hasParams;
@@ -231,8 +231,8 @@ function handlePlaylistFiles(files) {
     // Update analyze button state based on files AND parameters
     updateAnalyzeButtonState();
 
-    if (playlistFiles.length > 0 && playlistFiles.length < 15) {
-        showError('Please upload at least 15 tracks');
+    if (playlistFiles.length > 0 && playlistFiles.length < 2) {
+        showError('Please upload at least 2 tracks');
     } else if (playlistFiles.length > 30) {
         showError('Maximum 30 tracks allowed');
     }
