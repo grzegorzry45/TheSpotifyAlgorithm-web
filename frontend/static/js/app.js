@@ -25,10 +25,25 @@ let isProcessing = false;
 document.addEventListener('DOMContentLoaded', () => {
     console.log("DOM Content Loaded - App.js starting");
     // alert("DEBUG: JS is running! v2"); // Temporary debug alert
-    
-    initializeAuthUI();
-    checkAuthAndRenderUI(); // Check auth status on page load
 
+    // TEMPORARILY DISABLED: Authentication suspended for public beta
+    // initializeAuthUI();
+    checkAuthAndRenderUI(); // Check auth status on page load (now always shows app)
+
+    // Always initialize app features (no auth check)
+    initializeTabs();
+    initializeParameterSelection();
+    initializePlaylistUpload();
+    initializeUserTracksUpload();
+    initializeSingleCompare();
+    initializeRecommendations();
+    initializeCancelButtons();
+    initializeUnloadWarning();
+    initializePresets();
+    initializeCompareModeToggle();
+    initializeCollapsibleSections();
+
+    /* ORIGINAL CODE - COMMENTED OUT FOR PUBLIC BETA
     if (authToken) {
         initializeTabs();
         initializeParameterSelection();
@@ -42,6 +57,7 @@ document.addEventListener('DOMContentLoaded', () => {
         initializeCompareModeToggle();
         initializeCollapsibleSections(); // New call
     }
+    */
 });
 
 // ===== COLLAPSIBLE SECTIONS =====
@@ -70,9 +86,15 @@ function initializeCollapsibleSections() {
 
 function getAuthHeaders(isJson = false) {
     const headers = new Headers();
+
+    // TEMPORARILY DISABLED: Authentication suspended for public beta
+    // No authorization header sent
+    /* ORIGINAL CODE - COMMENTED OUT FOR PUBLIC BETA
     if (authToken) {
         headers.append('Authorization', `Bearer ${authToken}`);
     }
+    */
+
     if (isJson) {
         headers.append('Content-Type', 'application/json');
     }
@@ -106,6 +128,14 @@ function updateUIForAuth(isLoggedIn) {
     const registerBtn = document.getElementById('register-btn');
     const logoutBtn = document.getElementById('logout-btn');
 
+    // TEMPORARILY DISABLED: Authentication suspended for public beta
+    // Always show main app and hide auth buttons
+    mainApp.style.display = 'block';
+    loginBtn.style.display = 'none';
+    registerBtn.style.display = 'none';
+    logoutBtn.style.display = 'none';
+
+    /* ORIGINAL CODE - COMMENTED OUT FOR PUBLIC BETA
     if (isLoggedIn) {
         mainApp.style.display = 'block';
         loginBtn.style.display = 'none';
@@ -117,6 +147,7 @@ function updateUIForAuth(isLoggedIn) {
         registerBtn.style.display = 'inline-block';
         logoutBtn.style.display = 'none';
     }
+    */
 }
 
 function initializeAuthUI() {
