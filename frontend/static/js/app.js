@@ -121,34 +121,20 @@ function initializeAuthUI() {
     if(loginBtn) loginBtn.addEventListener('click', () => {
         console.log("Login button clicked");
         if(loginModal) {
-            console.log("Opening Login Modal.");
-            console.log("Modal Parent:", loginModal.parentNode.tagName, loginModal.parentNode.id);
-            console.log("Modal InnerHTML Length:", loginModal.innerHTML.length);
-
-            // Move to body to ensure no parent clipping/hiding
+            // Fix: Move to body if nested inside hidden container
             if (loginModal.parentNode !== document.body) {
-                console.warn("Modal is not direct child of body! Moving it...");
                 document.body.appendChild(loginModal);
             }
-
             loginModal.style.display = 'flex';
-            
-            // Force basic styles just in case
-            loginModal.style.position = 'fixed';
-            loginModal.style.zIndex = '10000';
-            
-            // Log geometry immediately and delayed
-            console.log("Geometry Immediate:", loginModal.getBoundingClientRect());
-            
-            setTimeout(() => {
-                 console.log("Geometry Delayed:", loginModal.getBoundingClientRect());
-                 console.log("Computed Display:", getComputedStyle(loginModal).display);
-            }, 100);
         }
     });
     if(registerBtn) registerBtn.addEventListener('click', () => {
         console.log("Register button clicked");
         if(registerModal) {
+             // Fix: Move to body if nested inside hidden container
+            if (registerModal.parentNode !== document.body) {
+                document.body.appendChild(registerModal);
+            }
             registerModal.style.display = 'flex';
         }
     });
