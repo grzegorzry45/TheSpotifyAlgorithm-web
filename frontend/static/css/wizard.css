@@ -129,7 +129,7 @@
 .reference-card {
     background: #1a1a1a;
     border: 2px solid #333;
-    border-radius: 12px;
+    border-radius: 0; /* Sharp edges - no rounded corners */
     padding: 30px;
     text-align: center;
     transition: all 0.3s ease;
@@ -181,7 +181,7 @@
     color: #4CAF50;
     background: rgba(76, 175, 80, 0.1);
     padding: 5px 12px;
-    border-radius: 20px;
+    border-radius: 0; /* Sharp edges */
     border: 1px solid rgba(76, 175, 80, 0.3);
 }
 
@@ -194,7 +194,7 @@
 .reference-upload-section {
     background: #1a1a1a;
     border: 2px solid #444;
-    border-radius: 12px;
+    border-radius: 0; /* Sharp edges */
     padding: 30px;
     margin-top: 30px;
     animation: slideDown 0.3s ease;
@@ -233,7 +233,7 @@
 .parameter-selection-wizard {
     background: #1a1a1a;
     border: 2px solid #444;
-    border-radius: 12px;
+    border-radius: 0; /* Sharp edges */
     padding: 30px;
     margin: 30px 0;
 }
@@ -275,7 +275,7 @@
 .recommendations-section {
     background: #1a1a1a;
     border: 2px solid #444;
-    border-radius: 12px;
+    border-radius: 0; /* Sharp edges */
     padding: 30px;
 }
 
@@ -296,7 +296,7 @@
 .track-name-container {
     background: #1a1a1a;
     border: 1px solid #444;
-    border-radius: 8px;
+    border-radius: 0; /* Sharp edges */
     padding: 15px 20px;
     margin: 20px 0;
     color: #fff;
@@ -364,7 +364,7 @@
 /* Success/Error Messages in Wizard */
 .wizard-message {
     padding: 15px 20px;
-    border-radius: 8px;
+    border-radius: 0; /* Sharp edges */
     margin: 20px 0;
     display: flex;
     align-items: center;
@@ -407,7 +407,7 @@
 .param-row {
     background: #0a0a0a;
     padding: 15px;
-    border-radius: 8px;
+    border-radius: 0; /* Sharp edges */
     border: 1px solid #333;
     display: flex;
     justify-content: space-between;
@@ -430,7 +430,7 @@
 .recommendation-category {
     background: #0a0a0a;
     border: 1px solid #333;
-    border-radius: 8px;
+    border-radius: 0; /* Sharp edges */
     padding: 20px;
     margin-bottom: 20px;
 }
@@ -473,7 +473,7 @@
 .wizard-preset {
     background: #0a0a0a;
     border: 1px solid #333;
-    border-radius: 8px;
+    border-radius: 0; /* Sharp edges */
     padding: 15px;
     margin-bottom: 10px;
     display: flex;
