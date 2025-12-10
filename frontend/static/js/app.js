@@ -130,10 +130,10 @@ function updateUIForAuth(isLoggedIn) {
 
     // TEMPORARILY DISABLED: Authentication suspended for public beta
     // Always show main app and hide auth buttons
-    mainApp.style.display = 'block';
-    loginBtn.style.display = 'none';
-    registerBtn.style.display = 'none';
-    logoutBtn.style.display = 'none';
+    if (mainApp) mainApp.style.display = 'block';
+    if (loginBtn) loginBtn.style.display = 'none';
+    if (registerBtn) registerBtn.style.display = 'none';
+    if (logoutBtn) logoutBtn.style.display = 'none';
 
     /* ORIGINAL CODE - COMMENTED OUT FOR PUBLIC BETA
     if (isLoggedIn) {
