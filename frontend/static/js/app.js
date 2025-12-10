@@ -23,6 +23,9 @@ let isProcessing = false;
 
 // Initialize on page load
 document.addEventListener('DOMContentLoaded', () => {
+    console.log("DOM Content Loaded - App.js starting");
+    // alert("DEBUG: JS is running! v2"); // Temporary debug alert
+    
     initializeAuthUI();
     checkAuthAndRenderUI(); // Check auth status on page load
 
