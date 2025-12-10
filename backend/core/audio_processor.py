@@ -43,21 +43,10 @@ class AudioProcessor:
             y_stereo = None
 
             if fast_mode:
-                # ALWAYS extract essential features first
-                print(f"DEBUG: Extracting ESSENTIAL parameters (always included)")
-                features = {
-                    'bpm': self.extract_bpm(y, sr),
-                    'energy': self.extract_energy(y),
-                    'loudness': self.extract_loudness(y),
-                    'spectral_centroid': self.extract_spectral_centroid(y, sr),
-                    'dynamic_range': self.extract_dynamic_range(y),
-                    'rms': self.extract_rms(y),
-                    'key': 'Unknown',  # Default value for fast mode
-                }
-
-                # Add additional parameters if specified
+                # USER SELECTED MODE: Extract ONLY the parameters user selected
                 if additional_params and len(additional_params) > 0:
-                    print(f"DEBUG: Adding ADDITIONAL parameters: {additional_params}")
+                    print(f"DEBUG: Extracting ONLY user-selected parameters: {additional_params}")
+                    features = {}
 
                     # Check if stereo is needed
                     stereo_params = ['stereo_width']
@@ -68,11 +57,15 @@ class AudioProcessor:
                         if y_stereo.ndim == 1:
                             y_stereo = np.array([y, y])
 
-                    # Extract additional parameters
+                    # Extract ONLY the selected parameters
                     for param in additional_params:
                         features.update(self._extract_param(param, y, sr, y_stereo, features))
 
-                return features
+                    return features
+                else:
+                    # No parameters selected - return error message
+                    print(f"DEBUG: No parameters selected by user")
+                    return None
 
             # FULL MODE: All features (slower, for local use)
             # Load stereo for advanced analysis

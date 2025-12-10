@@ -144,7 +144,25 @@ function initializeTabs() {
 
 // ===== PARAMETER SELECTION =====
 function initializeParameterSelection() {
-    // No initialization needed - users select parameters directly via checkboxes
+    // Listen to checkbox changes to validate analyze button state
+    const playlistCheckboxes = document.querySelectorAll('input[name="param"]');
+    playlistCheckboxes.forEach(cb => {
+        cb.addEventListener('change', updateAnalyzeButtonState);
+    });
+
+    const compareCheckboxes = document.querySelectorAll('input[name="param-compare"]');
+    compareCheckboxes.forEach(cb => {
+        cb.addEventListener('change', updateCompareBtnState);
+    });
+}
+
+function updateAnalyzeButtonState() {
+    const analyzeBtn = document.getElementById('analyze-playlist-btn');
+    const selectedParams = getSelectedParameters();
+    const hasFiles = playlistFiles.length >= 15 && playlistFiles.length <= 30;
+    const hasParams = selectedParams.length > 0;
+
+    analyzeBtn.disabled = !hasFiles || !hasParams;
 }
 
 function getSelectedParameters() {
@@ -187,7 +205,6 @@ function handlePlaylistFiles(files) {
     );
 
     const fileList = document.getElementById('playlist-file-list');
-    const analyzeBtn = document.getElementById('analyze-playlist-btn');
 
     fileList.innerHTML = '';
 
@@ -207,8 +224,8 @@ function handlePlaylistFiles(files) {
         });
     });
 
-    // Enable/disable analyze button
-    analyzeBtn.disabled = playlistFiles.length < 15 || playlistFiles.length > 30;
+    // Update analyze button state based on files AND parameters
+    updateAnalyzeButtonState();
 
     if (playlistFiles.length > 0 && playlistFiles.length < 15) {
         showError('Please upload at least 15 tracks');
@@ -218,6 +235,14 @@ function handlePlaylistFiles(files) {
 }
 
 async function analyzePlaylist() {
+    const selectedParams = getSelectedParameters();
+
+    // Validate that parameters are selected
+    if (selectedParams.length === 0) {
+        showError('Please select at least one parameter to analyze');
+        return;
+    }
+
     const progressContainer = document.getElementById('playlist-progress');
     const progressFill = document.getElementById('playlist-progress-fill');
     const progressText = document.getElementById('playlist-progress-text');
@@ -456,6 +481,14 @@ function handleUserTrackFiles(files) {
 }
 
 async function compareBatch() {
+    const selectedParams = getSelectedParameters();
+
+    // Validate that parameters are selected
+    if (selectedParams.length === 0) {
+        showError('Please select at least one parameter to analyze');
+        return;
+    }
+
     if (!sessionId) {
         showError('Please analyze playlist first');
         return;
@@ -653,6 +686,14 @@ function updateCompareBtnState() {
 }
 
 async function compareSingleTrack() {
+    const selectedParams = getSelectedParametersCompare();
+
+    // Validate that parameters are selected
+    if (selectedParams.length === 0) {
+        showError('Please select at least one parameter to analyze');
+        return;
+    }
+
     if (!sessionId && document.querySelector('input[name="compare-mode"]:checked').value === 'playlist') {
         // Create session if comparing vs playlist
         const formData = new FormData();

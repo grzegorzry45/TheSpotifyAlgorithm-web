@@ -150,6 +150,13 @@ async def analyze_playlist(request: dict):
     if not playlist_files:
         raise HTTPException(status_code=400, detail="No playlist files found")
 
+    # Validate that parameters are selected
+    if not additional_params or len(additional_params) == 0:
+        raise HTTPException(
+            status_code=400,
+            detail="Please select at least one parameter to analyze"
+        )
+
     # Analyze all tracks
     results = []
     errors = []
@@ -160,6 +167,8 @@ async def analyze_playlist(request: dict):
             if features:
                 features['filename'] = Path(file_path).name
                 results.append(features)
+            else:
+                errors.append(f"{Path(file_path).name}: No parameters selected")
         except Exception as e:
             errors.append(f"{Path(file_path).name}: {str(e)}")
 
@@ -193,6 +202,13 @@ async def compare_batch(request: dict):
     """
     session_id = request.get("session_id")
     additional_params = request.get("additional_params", [])
+
+    # Validate that parameters are selected
+    if not additional_params or len(additional_params) == 0:
+        raise HTTPException(
+            status_code=400,
+            detail="Please select at least one parameter to analyze"
+        )
 
     if session_id not in sessions:
         raise HTTPException(status_code=404, detail="Session not found")
@@ -264,6 +280,13 @@ async def compare_single(
             params_list = []
     else:
         print(f"DEBUG: No additional_params received")
+
+    # Validate that parameters are selected
+    if not params_list or len(params_list) == 0:
+        raise HTTPException(
+            status_code=400,
+            detail="Please select at least one parameter to analyze"
+        )
 
     # For track mode, create temporary session if needed
     if mode == "track":
