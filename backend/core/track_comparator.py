@@ -954,11 +954,16 @@ class TrackComparator:
     def compare_harmonic_complexity(self, your_hc: float) -> Dict:
         """Generate Harmonic Complexity recommendation"""
         ref_hc = self.reference.get('harmonic_complexity', 0)
-        if ref_hc == 0:
+
+        # Validate inputs
+        if ref_hc == 0 or your_hc == 0:
             return {'status': 'good', 'message': 'Harmonic Complexity: Data not available'}
 
-        diff = your_hc - ref_hc
-        diff_percent = abs(diff / ref_hc * 100) if ref_hc != 0 else 0
+        try:
+            diff = your_hc - ref_hc
+            diff_percent = abs(diff / ref_hc * 100) if ref_hc != 0 else 0
+        except (TypeError, ValueError, ZeroDivisionError):
+            return {'status': 'good', 'message': 'Harmonic Complexity: Data not available'}
 
         if diff_percent <= self.tolerance['perfect']:
             return {'status': 'perfect', 'message': f"Harmonic Complexity: {your_hc:.2f} - Perfect harmonic match!"}
@@ -978,11 +983,16 @@ class TrackComparator:
     def compare_melodic_range(self, your_mr: float) -> Dict:
         """Generate Melodic Range recommendation"""
         ref_mr = self.reference.get('melodic_range', 0)
-        if ref_mr == 0:
+
+        # Validate inputs
+        if ref_mr == 0 or your_mr == 0:
             return {'status': 'good', 'message': 'Melodic Range: Data not available'}
 
-        diff = your_mr - ref_mr
-        abs_diff = abs(diff)
+        try:
+            diff = your_mr - ref_mr
+            abs_diff = abs(diff)
+        except (TypeError, ValueError):
+            return {'status': 'good', 'message': 'Melodic Range: Data not available'}
 
         if abs_diff <= 3:
             return {'status': 'perfect', 'message': f"Melodic Range: {your_mr:.0f} semitones - Perfect melodic span!"}
@@ -1050,11 +1060,16 @@ class TrackComparator:
     def compare_repetition_score(self, your_rs: float) -> Dict:
         """Generate Repetition Score recommendation"""
         ref_rs = self.reference.get('repetition_score', 0)
-        if ref_rs == 0:
+
+        # Validate inputs
+        if ref_rs == 0 or your_rs == 0:
             return {'status': 'good', 'message': 'Repetition Score: Data not available'}
 
-        diff = your_rs - ref_rs
-        diff_percent = abs(diff / ref_rs * 100) if ref_rs != 0 else 0
+        try:
+            diff = your_rs - ref_rs
+            diff_percent = abs(diff / ref_rs * 100) if ref_rs != 0 else 0
+        except (TypeError, ValueError, ZeroDivisionError):
+            return {'status': 'good', 'message': 'Repetition Score: Data not available'}
 
         if diff_percent <= self.tolerance['perfect']:
             return {'status': 'perfect', 'message': f"Repetition Score: {your_rs:.2f} - Perfect hook repetition!"}

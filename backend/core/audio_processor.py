@@ -1090,5 +1090,12 @@ class AudioProcessor:
             print(f"Error extracting {param}: {e}")
             result[param] = 0.0
 
+        # Validate extracted values - replace NaN/inf with safe defaults
+        for key, value in result.items():
+            if isinstance(value, (int, float)):
+                if np.isnan(value) or np.isinf(value):
+                    print(f"Warning: {key} returned invalid value ({value}), using 0.0")
+                    result[key] = 0.0
+
         return result
 

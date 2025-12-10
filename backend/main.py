@@ -300,17 +300,26 @@ async def compare_single(
                 detail="Please analyze playlist first"
             )
 
-        comparator = PlaylistComparator(session["playlist_analysis"])
-        comparison = comparator.compare_track(user_features)
-        recommendations = comparator.generate_recommendations(comparison)
+        try:
+            comparator = PlaylistComparator(session["playlist_analysis"])
+            comparison = comparator.compare_track(user_features)
+            recommendations = comparator.generate_recommendations(comparison)
 
-        return {
-            "mode": "playlist",
-            "user_track": user_features,
-            "playlist_profile": session["playlist_profile"],
-            "comparison": comparison,
-            "recommendations": recommendations
-        }
+            return {
+                "mode": "playlist",
+                "user_track": user_features,
+                "playlist_profile": session["playlist_profile"],
+                "comparison": comparison,
+                "recommendations": recommendations
+            }
+        except Exception as e:
+            print(f"Error during playlist comparison: {e}")
+            import traceback
+            traceback.print_exc()
+            raise HTTPException(
+                status_code=500,
+                detail=f"Playlist comparison failed: {str(e)}"
+            )
 
     elif mode == "track":
         # Compare vs reference track
@@ -336,16 +345,25 @@ async def compare_single(
         ref_features['filename'] = reference_track.filename
 
         # Compare tracks (TrackComparator needs reference track in __init__)
-        track_comparator = TrackComparator(ref_features)
-        recommendations = track_comparator.compare_track(user_features)
+        try:
+            track_comparator = TrackComparator(ref_features)
+            recommendations = track_comparator.compare_track(user_features)
 
-        return {
-            "mode": "track",
-            "user_track": user_features,
-            "reference_track": ref_features,
-            "comparison": recommendations,  # compare_track already returns recommendations
-            "recommendations": recommendations
-        }
+            return {
+                "mode": "track",
+                "user_track": user_features,
+                "reference_track": ref_features,
+                "comparison": recommendations,  # compare_track already returns recommendations
+                "recommendations": recommendations
+            }
+        except Exception as e:
+            print(f"Error during track comparison: {e}")
+            import traceback
+            traceback.print_exc()
+            raise HTTPException(
+                status_code=500,
+                detail=f"Track comparison failed: {str(e)}"
+            )
 
     else:
         raise HTTPException(status_code=400, detail="Invalid mode. Use 'playlist' or 'track'")
