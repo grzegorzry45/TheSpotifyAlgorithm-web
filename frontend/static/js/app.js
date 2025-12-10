@@ -84,16 +84,17 @@ function updateUIForAuth(isLoggedIn) {
         mainApp.style.display = 'block';
         loginBtn.style.display = 'none';
         registerBtn.style.display = 'none';
-        logoutBtn.style.display = 'block';
+        logoutBtn.style.display = 'inline-block';
     } else {
         mainApp.style.display = 'none';
-        loginBtn.style.display = 'block';
-        registerBtn.style.display = 'block';
+        loginBtn.style.display = 'inline-block';
+        registerBtn.style.display = 'inline-block';
         logoutBtn.style.display = 'none';
     }
 }
 
 function initializeAuthUI() {
+    console.log("Initializing Auth UI");
     const loginBtn = document.getElementById('login-btn');
     const registerBtn = document.getElementById('register-btn');
     const logoutBtn = document.getElementById('logout-btn');
@@ -107,8 +108,14 @@ function initializeAuthUI() {
     const loginConfirm = document.getElementById('login-confirm');
     const registerConfirm = document.getElementById('register-confirm');
 
-    if(loginBtn) loginBtn.addEventListener('click', () => loginModal.style.display = 'flex');
-    if(registerBtn) registerBtn.addEventListener('click', () => registerModal.style.display = 'flex');
+    if(loginBtn) loginBtn.addEventListener('click', () => {
+        console.log("Login button clicked");
+        if(loginModal) loginModal.style.display = 'flex';
+    });
+    if(registerBtn) registerBtn.addEventListener('click', () => {
+        console.log("Register button clicked");
+        if(registerModal) registerModal.style.display = 'flex';
+    });
     
     if(loginCancel) loginCancel.addEventListener('click', () => loginModal.style.display = 'none');
     if(registerCancel) registerCancel.addEventListener('click', () => registerModal.style.display = 'none');
