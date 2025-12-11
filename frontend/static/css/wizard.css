@@ -219,7 +219,21 @@
     font-size: 18px;
 }
 
-/* Upload Zones */
+/* Upload Zones - Override base styles */
+.upload-zone {
+    border: 2px solid #444; /* Solid border instead of dashed - no dots! */
+    border-radius: 0; /* Sharp edges */
+}
+
+.upload-zone:hover {
+    border-color: #666;
+}
+
+.upload-zone.drag-over {
+    border-style: solid; /* Keep solid even when dragging */
+    border-color: #888;
+}
+
 .upload-zone.large {
     min-height: 250px;
     margin-bottom: 30px;
