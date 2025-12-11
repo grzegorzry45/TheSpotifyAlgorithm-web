@@ -37,6 +37,17 @@
     transition: all 0.3s ease;
 }
 
+/* Make active and completed steps clickable */
+.progress-step.active,
+.progress-step.completed {
+    cursor: pointer;
+}
+
+.progress-step.active:hover .step-number,
+.progress-step.completed:hover .step-number {
+    transform: scale(1.1);
+}
+
 .progress-step.active .step-number {
     background: #fff;
     color: #000;
@@ -48,6 +59,11 @@
     background: #4CAF50;
     border-color: #4CAF50;
     color: #fff;
+}
+
+.progress-step.completed:hover .step-number {
+    background: #5bc75f;
+    box-shadow: 0 0 20px rgba(76, 175, 80, 0.4);
 }
 
 .progress-step.completed .step-number::after {

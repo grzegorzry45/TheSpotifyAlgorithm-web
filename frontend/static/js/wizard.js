@@ -633,6 +633,19 @@ async function exportReport() {
 
 function initializeNavigation() {
     document.getElementById('back-to-step-1')?.addEventListener('click', () => goToStep(1));
+
+    // Make progress steps clickable
+    const progressSteps = document.querySelectorAll('.progress-step');
+    progressSteps.forEach((step, index) => {
+        const stepNumber = index + 1;
+
+        step.addEventListener('click', () => {
+            // Allow clicking on completed or active steps only
+            if (step.classList.contains('completed') || step.classList.contains('active')) {
+                goToStep(stepNumber);
+            }
+        });
+    });
 }
 
 function goToStep(stepNumber) {
