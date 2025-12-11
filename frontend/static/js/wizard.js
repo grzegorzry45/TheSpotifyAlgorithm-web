@@ -21,6 +21,9 @@ let referenceTrackData = null;
 // Abort controllers
 let abortController = null;
 
+// Track max step reached for navigation
+let maxStepReached = 1;
+
 // Initialize on page load
 document.addEventListener('DOMContentLoaded', () => {
     console.log("Wizard interface loaded");
@@ -590,6 +593,7 @@ function startOver() {
     referenceTrackFile = null;
     userTrackFile = null;
     playlistProfile = null;
+    maxStepReached = 1; // Reset max step
 
     // Clear UI
     document.querySelectorAll('.reference-card').forEach(card => card.classList.remove('selected'));
@@ -649,6 +653,11 @@ function initializeNavigation() {
 }
 
 function goToStep(stepNumber) {
+    // Update max step reached
+    if (stepNumber > maxStepReached) {
+        maxStepReached = stepNumber;
+    }
+
     // Hide all steps
     document.querySelectorAll('.wizard-step').forEach(step => {
         step.style.display = 'none';
@@ -660,9 +669,13 @@ function goToStep(stepNumber) {
     // Update progress indicator
     document.querySelectorAll('.progress-step').forEach((step, index) => {
         step.classList.remove('active', 'completed');
-        if (index + 1 === stepNumber) {
+        const currentStep = index + 1;
+
+        if (currentStep === stepNumber) {
+            // Current step is active
             step.classList.add('active');
-        } else if (index + 1 < stepNumber) {
+        } else if (currentStep <= maxStepReached) {
+            // All steps up to max reached are completed (accessible)
             step.classList.add('completed');
         }
     });
