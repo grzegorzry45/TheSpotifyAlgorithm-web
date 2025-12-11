@@ -170,19 +170,20 @@
 
 .card-benefits {
     display: flex;
+    flex-direction: column;
     gap: 10px;
-    justify-content: center;
     margin-bottom: 25px;
-    flex-wrap: wrap;
 }
 
 .benefit {
     font-size: 12px;
-    color: #4CAF50;
-    background: rgba(76, 175, 80, 0.1);
+    color: #00e5ff;
+    background: rgba(0, 229, 255, 0.1);
     padding: 5px 12px;
     border-radius: 0; /* Sharp edges */
-    border: 1px solid rgba(76, 175, 80, 0.3);
+    border: 1px solid rgba(0, 229, 255, 0.3);
+    width: 100%;
+    text-align: center;
 }
 
 .select-reference-btn {
