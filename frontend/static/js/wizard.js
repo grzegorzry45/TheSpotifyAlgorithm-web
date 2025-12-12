@@ -543,11 +543,9 @@ async function compareTrack() {
         progressFill.style.width = '100%';
         progressText.textContent = '✅ Analysis complete!';
 
-        // Display results
-        setTimeout(() => {
-            displayResults(results);
-            goToStep(3);
-        }, 500);
+        // Display results immediately
+        displayResults(results);
+        goToStep(3);
 
     } catch (error) {
         if (progressInterval) clearInterval(progressInterval);
