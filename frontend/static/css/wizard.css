@@ -805,3 +805,179 @@
         color: #ffa726;
     }
 }
+
+/* ===================================
+   PROGRESS MODAL
+   =================================== */
+
+.progress-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.85);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+    animation: fadeIn 0.3s ease-out;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+.progress-modal-content {
+    background: linear-gradient(135deg, #1a1a1a 0%, #0a0a0a 100%);
+    border: 2px solid #1DB954;
+    border-radius: 12px;
+    padding: 40px;
+    min-width: 500px;
+    max-width: 600px;
+    box-shadow:
+        0 20px 60px rgba(0, 0, 0, 0.8),
+        0 0 40px rgba(29, 185, 84, 0.2),
+        inset 0 0 60px rgba(29, 185, 84, 0.05);
+    animation: slideUp 0.4s ease-out;
+    position: relative;
+}
+
+@keyframes slideUp {
+    from {
+        transform: translateY(30px);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+.progress-modal-header {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    margin-bottom: 30px;
+}
+
+.progress-spinner {
+    width: 40px;
+    height: 40px;
+    border: 3px solid rgba(29, 185, 84, 0.2);
+    border-top: 3px solid #1DB954;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+#progress-modal-title {
+    margin: 0;
+    color: #fff;
+    font-size: 24px;
+    font-weight: 700;
+    letter-spacing: -0.5px;
+}
+
+.progress-modal-body {
+    margin-top: 25px;
+}
+
+.progress-bar-modal {
+    width: 100%;
+    height: 8px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 4px;
+    overflow: hidden;
+    margin-bottom: 20px;
+    position: relative;
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.progress-fill-modal {
+    height: 100%;
+    background: linear-gradient(90deg, #1DB954 0%, #1ed760 100%);
+    border-radius: 4px;
+    width: 0%;
+    transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow:
+        0 0 20px rgba(29, 185, 84, 0.6),
+        0 0 40px rgba(29, 185, 84, 0.3);
+    position: relative;
+    overflow: hidden;
+}
+
+/* Animated shimmer effect on progress bar */
+.progress-fill-modal::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(
+        90deg,
+        transparent,
+        rgba(255, 255, 255, 0.3),
+        transparent
+    );
+    animation: shimmer 2s infinite;
+}
+
+@keyframes shimmer {
+    0% {
+        left: -100%;
+    }
+    100% {
+        left: 100%;
+    }
+}
+
+.progress-message-modal {
+    color: #b0b0b0;
+    font-size: 14px;
+    text-align: center;
+    margin: 0;
+    font-weight: 500;
+    letter-spacing: 0.5px;
+    min-height: 20px;
+    animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+    0%, 100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.7;
+    }
+}
+
+/* Responsive */
+@media (max-width: 640px) {
+    .progress-modal-content {
+        min-width: auto;
+        width: 90%;
+        padding: 30px 20px;
+    }
+
+    #progress-modal-title {
+        font-size: 18px;
+    }
+
+    .progress-spinner {
+        width: 30px;
+        height: 30px;
+    }
+}

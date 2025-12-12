@@ -24,6 +24,48 @@ let abortController = null;
 // Track max step reached for navigation
 let maxStepReached = 1;
 
+// Progress modal interval
+let progressModalInterval = null;
+
+// ===== PROGRESS MODAL FUNCTIONS =====
+
+function showProgressModal(title = 'Processing Audio...') {
+    const modal = document.getElementById('progress-modal');
+    const titleElement = document.getElementById('progress-modal-title');
+    const progressFill = document.getElementById('progress-fill-modal');
+    const progressMessage = document.getElementById('progress-message-modal');
+
+    titleElement.textContent = title;
+    progressFill.style.width = '0%';
+    progressMessage.textContent = 'Initializing...';
+    modal.style.display = 'flex';
+
+    // Prevent scrolling when modal is open
+    document.body.style.overflow = 'hidden';
+}
+
+function hideProgressModal() {
+    const modal = document.getElementById('progress-modal');
+    modal.style.display = 'none';
+
+    // Re-enable scrolling
+    document.body.style.overflow = 'auto';
+
+    // Clear any running intervals
+    if (progressModalInterval) {
+        clearInterval(progressModalInterval);
+        progressModalInterval = null;
+    }
+}
+
+function updateProgressModal(progress, message) {
+    const progressFill = document.getElementById('progress-fill-modal');
+    const progressMessage = document.getElementById('progress-message-modal');
+
+    progressFill.style.width = progress + '%';
+    progressMessage.textContent = message;
+}
+
 // Initialize on page load
 document.addEventListener('DOMContentLoaded', () => {
     console.log("Wizard interface loaded");
@@ -209,18 +251,14 @@ async function analyzePlaylist() {
         return;
     }
 
-    // Show progress
-    const progressContainer = document.getElementById('playlist-progress');
-    const progressFill = document.getElementById('playlist-progress-fill');
-    const progressText = document.getElementById('playlist-progress-text');
-
-    progressContainer.style.display = 'block';
-    progressText.textContent = 'Uploading files...';
-    progressFill.style.width = '10%';
+    // Show progress modal
+    showProgressModal('Analyzing Playlist...');
 
     try {
         // Create abort controller
         abortController = new AbortController();
+
+        updateProgressModal(10, 'Uploading files...');
 
         // Upload files
         const formData = new FormData();
@@ -237,8 +275,7 @@ async function analyzePlaylist() {
         const uploadData = await uploadResponse.json();
         sessionId = uploadData.session_id;
 
-        progressFill.style.width = '40%';
-        progressText.textContent = 'Analyzing audio features...';
+        updateProgressModal(40, 'Analyzing audio features...');
 
         // Get selected parameters from playlist params
         const selectedParams = getPlaylistParameters();
@@ -260,36 +297,41 @@ async function analyzePlaylist() {
         playlistProfile = analyzeData.profile;
         playlistAnalysis = analyzeData.profile; // Store for preset saving
 
-        progressFill.style.width = '100%';
-        progressText.textContent = 'Analysis complete!';
+        updateProgressModal(100, 'Analysis complete!');
 
-        // Mark reference as ready
-        referenceReady = true;
-        document.getElementById('wizard-reference-ready').textContent = 'true';
-
-        // Display playlist profile
-        displayPlaylistProfile(playlistProfile);
-
-        // Show success and enable next step immediately
-        showMessage('Playlist analyzed successfully! You can now save it as a preset or proceed to Step 2 →', 'success');
-        enableStep2Navigation();
-
-        // Auto-scroll to results
+        // Hide modal with slight delay to show completion
         setTimeout(() => {
-            const resultsSection = document.getElementById('playlist-results');
-            if (resultsSection) {
-                resultsSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
-            }
-        }, 200);
+            hideProgressModal();
+
+            // Mark reference as ready
+            referenceReady = true;
+            document.getElementById('wizard-reference-ready').textContent = 'true';
+
+            // Display playlist profile
+            displayPlaylistProfile(playlistProfile);
+
+            // Show success and enable next step
+            showMessage('Playlist analyzed successfully! You can now save it as a preset or proceed to Step 2 →', 'success');
+            enableStep2Navigation();
+
+            // Auto-scroll to results
+            setTimeout(() => {
+                const resultsSection = document.getElementById('playlist-results');
+                if (resultsSection) {
+                    resultsSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+            }, 100);
+        }, 500);
 
     } catch (error) {
+        hideProgressModal();
+
         if (error.name === 'AbortError') {
-            progressText.textContent = 'Cancelled';
+            showMessage('Analysis cancelled', 'error');
         } else {
             console.error('Analysis error:', error);
             showMessage('Analysis failed: ' + error.message, 'error');
         }
-        progressFill.style.width = '0%';
     }
 }
 
@@ -511,11 +553,8 @@ async function compareTrack() {
         return;
     }
 
-    const progressContainer = document.getElementById('comparison-progress');
-    const progressFill = document.getElementById('comparison-progress-fill');
-    const progressText = document.getElementById('comparison-progress-text');
-
-    progressContainer.style.display = 'block';
+    // Show progress modal
+    showProgressModal('Comparing Tracks...');
 
     // Dynamic progress messages
     const progressSteps = [
@@ -531,14 +570,12 @@ async function compareTrack() {
     ];
 
     let currentStep = 0;
-    let progressInterval = null;
 
     // Function to update progress
     const updateProgress = () => {
         if (currentStep < progressSteps.length) {
             const step = progressSteps[currentStep];
-            progressFill.style.width = step.progress + '%';
-            progressText.textContent = step.message;
+            updateProgressModal(step.progress, step.message);
             currentStep++;
         }
     };
@@ -567,7 +604,7 @@ async function compareTrack() {
         }
 
         // Start progress animation (update every 800ms)
-        progressInterval = setInterval(updateProgress, 800);
+        progressModalInterval = setInterval(updateProgress, 800);
 
         const response = await fetch(`${API_BASE}/api/compare/single`, {
             method: 'POST',
@@ -576,25 +613,24 @@ async function compareTrack() {
         });
 
         // Clear interval - stops at ~96% "Almost complete..."
-        if (progressInterval) clearInterval(progressInterval);
+        if (progressModalInterval) {
+            clearInterval(progressModalInterval);
+            progressModalInterval = null;
+        }
 
         if (!response.ok) throw new Error('Comparison failed');
 
         const results = await response.json();
 
-        // Immediately display results and transition (no "complete" message)
+        // Hide modal and immediately display results
+        hideProgressModal();
         displayResults(results);
         goToStep(3);
 
-        // Hide progress after transition
-        progressContainer.style.display = 'none';
-
     } catch (error) {
-        if (progressInterval) clearInterval(progressInterval);
+        hideProgressModal();
         console.error('Comparison error:', error);
         showMessage('Comparison failed: ' + error.message, 'error');
-        progressFill.style.width = '0%';
-        progressText.textContent = '';
     }
 }
 
