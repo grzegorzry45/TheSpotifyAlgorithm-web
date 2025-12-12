@@ -662,7 +662,13 @@ function displayResults(results) {
 
         Object.entries(userTrack).forEach(([key, userValue]) => {
             if (key !== 'filename' && typeof userValue !== 'object') {
-                const refValue = referenceData[key];
+                let refValue = referenceData[key];
+
+                // Handle playlist profile object (extract mean)
+                if (refValue && typeof refValue === 'object' && refValue.hasOwnProperty('mean')) {
+                    refValue = refValue.mean;
+                }
+
                 const hasDiff = refValue !== undefined && refValue !== null;
 
                 // Calculate difference (if both are numbers)
