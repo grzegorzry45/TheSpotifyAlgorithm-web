@@ -191,6 +191,16 @@ function handlePlaylistFiles(files) {
 
     // Update analyze button state
     updateAnalyzeButton();
+
+    // Auto-scroll to parameter selection or analyze button
+    if (playlistFiles.length > 0) {
+        setTimeout(() => {
+            const paramSection = document.querySelector('.parameter-selection-wizard');
+            if (paramSection) {
+                paramSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+        }, 100);
+    }
 }
 
 async function analyzePlaylist() {
@@ -264,6 +274,14 @@ async function analyzePlaylist() {
         showMessage('Playlist analyzed successfully! You can now save it as a preset or proceed to Step 2 →', 'success');
         enableStep2Navigation();
 
+        // Auto-scroll to results
+        setTimeout(() => {
+            const resultsSection = document.getElementById('playlist-results');
+            if (resultsSection) {
+                resultsSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+        }, 200);
+
     } catch (error) {
         if (error.name === 'AbortError') {
             progressText.textContent = 'Cancelled';
@@ -293,6 +311,14 @@ function handleReferenceTrack(files) {
             nameContainer.classList.remove('has-file');
             document.getElementById('confirm-reference-btn').disabled = true;
         });
+
+        // Auto-scroll to confirm button
+        setTimeout(() => {
+            const confirmBtn = document.getElementById('confirm-reference-btn');
+            if (confirmBtn) {
+                confirmBtn.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+        }, 100);
     }
 }
 
@@ -461,6 +487,14 @@ function handleUserTrack(files) {
 
         // Enable compare button if parameters selected
         updateCompareButton();
+
+        // Auto-scroll to parameter selection
+        setTimeout(() => {
+            const paramSection = document.querySelector('.parameter-selection-wizard');
+            if (paramSection) {
+                paramSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+        }, 100);
     }
 }
 
@@ -822,6 +856,14 @@ function selectEssentialParams() {
         cb.checked = essential.includes(cb.value);
     });
     updateCompareButton();
+
+    // Auto-scroll to compare button
+    setTimeout(() => {
+        const compareBtn = document.getElementById('compare-now-btn');
+        if (compareBtn && !compareBtn.disabled) {
+            compareBtn.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+    }, 100);
 }
 
 function selectAllParams() {
@@ -829,6 +871,14 @@ function selectAllParams() {
         cb.checked = true;
     });
     updateCompareButton();
+
+    // Auto-scroll to compare button
+    setTimeout(() => {
+        const compareBtn = document.getElementById('compare-now-btn');
+        if (compareBtn && !compareBtn.disabled) {
+            compareBtn.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+    }, 100);
 }
 
 function selectEssentialPlaylistParams() {
@@ -837,6 +887,14 @@ function selectEssentialPlaylistParams() {
         cb.checked = essential.includes(cb.value);
     });
     updateAnalyzeButton();
+
+    // Auto-scroll to analyze button
+    setTimeout(() => {
+        const analyzeBtn = document.getElementById('analyze-playlist-btn');
+        if (analyzeBtn && !analyzeBtn.disabled) {
+            analyzeBtn.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+    }, 100);
 }
 
 function selectAllPlaylistParams() {
@@ -844,6 +902,14 @@ function selectAllPlaylistParams() {
         cb.checked = true;
     });
     updateAnalyzeButton();
+
+    // Auto-scroll to analyze button
+    setTimeout(() => {
+        const analyzeBtn = document.getElementById('analyze-playlist-btn');
+        if (analyzeBtn && !analyzeBtn.disabled) {
+            analyzeBtn.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+    }, 100);
 }
 
 function updateAnalyzeButton() {
@@ -924,6 +990,14 @@ async function loadPresetInWizard(preset) {
 
         showMessage(`Preset "${preset.name}" loaded! Proceed to Step 2 →`, 'success');
         enableStep2Navigation();
+
+        // Auto-scroll to next button
+        setTimeout(() => {
+            const nextBtn = document.querySelector('.next-to-step-2');
+            if (nextBtn) {
+                nextBtn.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+        }, 200);
 
     } catch (error) {
         console.error('Preset load error:', error);
