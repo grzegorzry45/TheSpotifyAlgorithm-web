@@ -80,21 +80,19 @@ function initializeAuth() {
             // Logged In
             if (mainAppContent) mainAppContent.style.display = 'block';
             if (landingHero) landingHero.style.display = 'none';
-            if (logoutBtnHeader) logoutBtnHeader.style.display = 'inline-block'; // Show logout
             if (loggedInStatusEl) loggedInStatusEl.style.display = 'block';
             if (userEmailDisplay) userEmailDisplay.textContent = userEmail || '';
 
-            // Fetch and display credits
+            // Fetch and display credits (logout button is inside credits-display, so it shows automatically)
             fetchCredits();
         } else {
             // Logged Out
             userEmail = null;
             if (mainAppContent) mainAppContent.style.display = 'none';
             if (landingHero) landingHero.style.display = 'block';
-            if (logoutBtnHeader) logoutBtnHeader.style.display = 'none'; // Hide logout
             if (loggedInStatusEl) loggedInStatusEl.style.display = 'none';
 
-            // Hide credits display
+            // Hide credits display (logout button inside will be hidden too)
             const creditsDisplayEl = document.getElementById('credits-display');
             if (creditsDisplayEl) creditsDisplayEl.style.display = 'none';
         }
