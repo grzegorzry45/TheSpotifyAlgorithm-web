@@ -29,26 +29,10 @@ let progressModalInterval = null;
 
 // ===== AUTHENTICATION =====
 let authToken = localStorage.getItem('access_token');
+let userEmail = null; // To store logged in user's email
 
 function getAuthHeaders() {
     return authToken ? { 'Authorization': `Bearer ${authToken}` } : {};
-}
-
-function handleAuthError(response) {
-    if (response.status === 401) {
-        showMessage('Session expired. Please login again.', 'error');
-        authToken = null;
-        localStorage.removeItem('access_token');
-        const loginBtn = document.getElementById('login-btn');
-        if (loginBtn) {
-            loginBtn.textContent = 'Login';
-            loginBtn.classList.replace('btn-primary', 'btn-secondary');
-        }
-        const loginModal = document.getElementById('login-modal');
-        if (loginModal) loginModal.style.display = 'flex';
-        return true;
-    }
-    return false;
 }
 
 function handleAuthError(response) {
@@ -65,7 +49,6 @@ function handleAuthError(response) {
 }
 
 function initializeAuth() {
-    // const loginBtn = document.getElementById('login-btn'); // Removed as per user request
     const loginModal = document.getElementById('login-modal');
     const registerModal = document.getElementById('register-modal');
     
@@ -73,19 +56,44 @@ function initializeAuth() {
     const mainAppContent = document.getElementById('main-app-content');
     const landingHero = document.getElementById('landing-hero');
     const logoutBtnHeader = document.getElementById('logout-btn-header'); // New button
+    const userEmailDisplay = document.getElementById('user-email-display'); // User email display
+
+    function decodeJwt(token) {
+        try {
+            const base64Url = token.split('.')[1];
+            const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+            const jsonPayload = decodeURIComponent(atob(base64).split('').map(function(c) {
+                return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+            }).join(''));
+            return JSON.parse(jsonPayload);
+        } catch (e) {
+            return null;
+        }
+    }
 
     function updateUIState() {
         if (authToken) {
+            const decodedToken = decodeJwt(authToken);
+            userEmail = decodedToken ? decodedToken.sub : null;
+
             // Logged In
             if (mainAppContent) mainAppContent.style.display = 'block';
             if (landingHero) landingHero.style.display = 'none';
             if (logoutBtnHeader) logoutBtnHeader.style.display = 'inline-block'; // Show logout
+            if (userEmailDisplay) {
+                userEmailDisplay.textContent = userEmail || '';
+                userEmailDisplay.style.display = 'inline';
+            }
         } else {
             // Logged Out
+            userEmail = null;
             if (mainAppContent) mainAppContent.style.display = 'none';
             if (landingHero) landingHero.style.display = 'block';
             if (logoutBtnHeader) logoutBtnHeader.style.display = 'none'; // Hide logout
+            if (userEmailDisplay) userEmailDisplay.style.display = 'none';
         }
+        // Re-render presets to reflect auth state (cloud vs system)
+        renderPresetsInWizard();
     }
 
     // Initial State Check
@@ -100,7 +108,7 @@ function initializeAuth() {
         if (registerModal) registerModal.style.display = 'flex';
     });
 
-    // New Logout Button in Header
+    // Logout Button in Header
     if (logoutBtnHeader) {
         logoutBtnHeader.addEventListener('click', () => {
             authToken = null;
@@ -135,7 +143,7 @@ function initializeAuth() {
             authToken = data.access_token;
             localStorage.setItem('access_token', authToken);
             
-            updateUIState();
+            updateUIState(); // Update UI after successful login
             if (loginModal) loginModal.style.display = 'none';
             showMessage('Login successful!', 'success');
             
@@ -194,7 +202,7 @@ function initializeAuth() {
                 const data = await loginResp.json();
                 authToken = data.access_token;
                 localStorage.setItem('access_token', authToken);
-                updateUIState();
+                updateUIState(); // Update UI after successful login
             }
 
             if (registerModal) registerModal.style.display = 'none';
@@ -277,8 +285,8 @@ function initializeWizard() {
         // Collapsible sections
         initializeCollapsibleSections();
 
-        // Load presets if any
-        loadPresetsForWizard();
+        // Load presets if any (will be called by initializeAuth's updateUIState)
+        // loadPresetsForWizard();
     } catch (error) {
         console.error("Wizard initialization failed:", error);
         alert("Wizard initialization failed. Please reload the page. Error: " + error.message);
@@ -287,35 +295,27 @@ function initializeWizard() {
 
 // ===== COLLAPSIBLE SECTIONS =====
 function initializeCollapsibleSections() {
-    // Use event delegation for robustness
-    document.addEventListener('click', (e) => {
-        const header = e.target.closest('.collapsible-header');
-        if (!header) return;
-
-        const targetId = header.dataset.target;
-        const content = document.getElementById(targetId);
-        
-        if (content) {
-            e.preventDefault(); // Prevent text selection or other defaults
-            
-            header.classList.toggle('active');
-            content.classList.toggle('collapsed');
-            
-            // Update collapse icon
-            const icon = header.querySelector('.collapse-icon');
-            if (icon) {
-                icon.textContent = header.classList.contains('active') ? '▼' : '▶';
+    const headers = document.querySelectorAll('.collapsible-header');
+    headers.forEach(header => {
+        header.addEventListener('click', () => {
+            const targetId = header.dataset.target;
+            const content = document.getElementById(targetId);
+            if (content) {
+                header.classList.toggle('active');
+                content.classList.toggle('collapsed');
+                // Update collapse icon
+                const icon = header.querySelector('.collapse-icon');
+                if (icon) {
+                    icon.textContent = header.classList.contains('active') ? '▼' : '▶';
+                }
+                // Adjust max-height for smooth transition
+                if (content.classList.contains('collapsed')) {
+                    content.style.maxHeight = null;
+                } else {
+                    content.style.maxHeight = content.scrollHeight + "px";
+                }
             }
-            
-            // Adjust max-height
-            if (content.classList.contains('collapsed')) {
-                content.style.maxHeight = null;
-            } else {
-                // Ensure we get a value even if slightly off
-                const height = content.scrollHeight || 1000;
-                content.style.maxHeight = height + "px";
-            }
-        }
+        });
     });
 }
 
@@ -476,6 +476,10 @@ function handlePlaylistFiles(files) {
 }
 
 async function analyzePlaylist() {
+    if (!authToken) {
+        showMessage('Please login to analyze a playlist.', 'error');
+        return;
+    }
     if (playlistFiles.length < 2) {
         showMessage('Please upload at least 2 tracks', 'error');
         return;
@@ -498,6 +502,7 @@ async function analyzePlaylist() {
         const uploadResponse = await new Promise((resolve, reject) => {
             const xhr = new XMLHttpRequest();
             xhr.open('POST', `${API_BASE}/api/upload/playlist`);
+            xhr.setRequestHeader('Authorization', getAuthHeaders().Authorization); // Add auth header
             
             xhr.upload.onprogress = (e) => {
                 if (e.lengthComputable) {
@@ -567,7 +572,7 @@ async function analyzePlaylist() {
         // Analyze playlist
         const analyzeResponse = await fetch(`${API_BASE}/api/analyze/playlist`, {
             method: 'POST',
-            headers: { 
+            headers: {
                 'Content-Type': 'application/json',
                 ...getAuthHeaders()
             },
@@ -697,73 +702,58 @@ function displayPlaylistProfile(profile) {
 }
 
 function showSavePresetModal() {
-    const modal = document.getElementById('save-preset-modal');
-    const input = document.getElementById('preset-name-input-wizard');
-    const saveBtn = document.getElementById('preset-save-confirm-wizard');
-    const cancelBtn = document.getElementById('preset-save-cancel-wizard');
-
-    modal.style.display = 'flex';
-    input.value = '';
-    input.focus();
-
-    // Handle save
-    const handleSave = () => {
-        const name = input.value.trim();
-        if (!name) {
-            showMessage('Please enter a preset name', 'error');
-            return;
-        }
-
-        savePlaylistPreset(name);
-        modal.style.display = 'none';
-        saveBtn.removeEventListener('click', handleSave);
-        cancelBtn.removeEventListener('click', handleCancel);
-    };
-
-    // Handle cancel
-    const handleCancel = () => {
-        modal.style.display = 'none';
-        saveBtn.removeEventListener('click', handleSave);
-        cancelBtn.removeEventListener('click', handleCancel);
-    };
-
-    saveBtn.addEventListener('click', handleSave);
-    cancelBtn.addEventListener('click', handleCancel);
-
-    // Enter key to save
-    input.addEventListener('keypress', (e) => {
-        if (e.key === 'Enter') {
-            handleSave();
-        }
-    });
+    if (!playlistProfile) {
+        showMessage('Please analyze a playlist first', 'error');
+        return;
+    }
+    document.getElementById('save-preset-modal').style.display = 'block';
 }
 
-function savePlaylistPreset(name) {
-    if (!playlistProfile || !playlistAnalysis) {
-        showMessage('No playlist data to save', 'error');
+async function savePreset() {
+    const nameInput = document.getElementById('preset-name-input-wizard');
+    const name = nameInput.value.trim();
+    
+    if (!name) {
+        alert('Please enter a preset name');
+        return;
+    }
+    
+    if (!playlistProfile) {
+        alert('No profile data to save');
         return;
     }
 
-    const preset = {
+    if (!authToken) {
+        showMessage('Please login to save presets to the cloud.', 'error');
+        return;
+    }
+    
+    const presetData = {
         name: name,
-        timestamp: Date.now(),
         profile: playlistProfile,
-        analysis: playlistAnalysis
+        // analysis: playlistAnalysis // analysis is not stored in cloud preset schema
     };
 
-    // Get existing presets
-    let presets = JSON.parse(localStorage.getItem('audio_presets') || '[]');
+    try {
+        const response = await fetch(`${API_BASE}/api/presets`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', ...getAuthHeaders() },
+            body: JSON.stringify(presetData)
+        });
 
-    // Add new preset
-    presets.unshift(preset); // Add to beginning
+        if (handleAuthError(response)) return;
+        if (!response.ok) throw new Error('Failed to save preset to cloud');
 
-    // Save to localStorage
-    localStorage.setItem('audio_presets', JSON.stringify(presets));
+        // After saving, refresh the list to show new preset
+        renderPresetsInWizard();
+        showMessage(`Preset "${name}" saved to cloud!`, 'success');
+        document.getElementById('save-preset-modal').style.display = 'none';
+        nameInput.value = '';
 
-    showMessage(`Preset "${name}" saved successfully! ✓`, 'success');
-
-    // Refresh preset list if visible
-    renderPresetsInWizard();
+    } catch (error) {
+        console.error('Cloud save failed:', error);
+        showMessage('Failed to save preset to cloud: ' + error.message, 'error');
+    }
 }
 
 function enableStep2Navigation() {
@@ -840,6 +830,10 @@ function updateCompareButton() {
 }
 
 async function compareTrack() {
+    if (!authToken) {
+        showMessage('Please login to compare tracks.', 'error');
+        return;
+    }
     if (!userTrackFile || !referenceReady) {
         showMessage('Please complete all required fields', 'error');
         return;
@@ -927,8 +921,13 @@ async function compareTrack() {
 
     } catch (error) {
         hideProgressModal();
-        console.error('Comparison error:', error);
-        showMessage('Comparison failed: ' + error.message, 'error');
+
+        if (error.name === 'AbortError') {
+            showMessage('Comparison cancelled', 'error');
+        } else {
+            console.error('Comparison error:', error);
+            showMessage('Comparison failed: ' + error.message, 'error');
+        }
     }
 }
 
@@ -1068,7 +1067,7 @@ async function exportReport() {
     try {
         const response = await fetch(`${API_BASE}/api/report/generate`, {
             method: 'POST',
-            headers: { 
+            headers: {
                 'Content-Type': 'application/json',
                 ...getAuthHeaders()
             },
@@ -1344,91 +1343,141 @@ const SYSTEM_PRESETS = [
     }
 ];
 
-function loadPresetsForWizard() {
-    // Load from localStorage
-    const userPresets = JSON.parse(localStorage.getItem('audio_presets') || '[]');
-    // Return both system (first) and user presets
-    return { system: SYSTEM_PRESETS, user: userPresets };
+async function loadPresetsForWizard() {
+    const systemPresets = SYSTEM_PRESETS;
+    let userPresets = [];
+
+    if (authToken) {
+        // Fetch from cloud
+        try {
+            const response = await fetch(`${API_BASE}/api/presets`, { headers: getAuthHeaders() });
+            if (handleAuthError(response)) return { system: systemPresets, user: [] }; // Handle re-login
+            if (!response.ok) throw new Error('Failed to fetch cloud presets');
+            userPresets = await response.json();
+        } catch (error) {
+            console.error('Error fetching cloud presets:', error);
+            showMessage('Failed to load your cloud presets.', 'error');
+        }
+    } else {
+        // If not logged in, user presets are empty (only system presets are shown)
+        // User presets should not be loaded from localStorage if not logged in,
+        // as the expectation is cloud-based storage when authenticated.
+    }
+    return { system: systemPresets, user: userPresets };
 }
 
 function renderPresetsInWizard() {
     const { system, user } = loadPresetsForWizard();
-    const listDiv = document.getElementById('preset-list-display');
+    // Wait for promise if needed, but loadPresetsForWizard is async now
+    // We should call it and then render. 
+    // BUT since we can't await easily in top-level or here without major refactor, 
+    // let's handle the promise inside.
+    
+    loadPresetsForWizard().then(({ system, user }) => {
+        const listDiv = document.getElementById('preset-list-display');
 
-    if (system.length === 0 && user.length === 0) {
-        listDiv.innerHTML = '<p class="placeholder">No presets available</p>';
-        return;
-    }
+        if (system.length === 0 && user.length === 0) {
+            listDiv.innerHTML = '<p class="placeholder">No presets available</p>';
+            return;
+        }
 
-    let html = '<div class="presets-split-view">';
+        let html = '<div class="presets-split-view">';
 
-    // LEFT COLUMN: User Presets
-    html += '<div class="presets-column user-column">';
-    html += '<h4 class="preset-group-title">👤 Your Presets</h4>';
-    html += '<div class="preset-list-content">';
-    if (user.length > 0) {
-        user.forEach((preset, index) => {
-            html += createPresetHTML(preset, 'user', index);
-        });
-    } else {
-        html += '<p class="placeholder small">You haven\'t saved any presets yet.</p>';
-    }
-    html += '</div></div>'; // Close content and column
-
-    // RIGHT COLUMN: System Presets
-    html += '<div class="presets-column system-column">';
-    html += '<h4 class="preset-group-title">🏆 Official Algorithms</h4>';
-    html += '<div class="preset-list-content">';
-    if (system.length > 0) {
-        system.forEach((preset) => {
-            html += createPresetHTML(preset, 'system');
-        });
-    }
-    html += '</div></div>'; // Close content and column
-
-    html += '</div>'; // Close split view
-
-    listDiv.innerHTML = html;
-
-    // Add click handlers for LOAD
-    listDiv.querySelectorAll('.preset-btn.load').forEach(btn => {
-        btn.addEventListener('click', (e) => {
-            const type = e.target.dataset.type;
-            let preset;
-            if (type === 'system') {
-                preset = system.find(p => p.id === e.target.dataset.id);
+        // LEFT COLUMN: User Presets
+        html += '<div class="presets-column user-column">';
+        html += '<h4 class="preset-group-title">👤 Your Presets</h4>';
+        html += '<div class="preset-list-content">';
+        if (user.length > 0) {
+            user.forEach((preset) => { // Removed index for backend presets
+                html += createPresetHTML(preset, 'user');
+            });
+        } else {
+            if (authToken) {
+                html += '<p class="placeholder small">You haven\'t saved any presets to the cloud yet.</p>';
             } else {
-                preset = user[parseInt(e.target.dataset.index)];
+                html += '<p class="placeholder small">Please login to see and save your cloud presets.</p>';
             }
-            loadPresetInWizard(preset);
-        });
-    });
+        }
+        html += '</div></div>'; // Close content and column
 
-    // Add click handlers for DELETE (User only)
-    listDiv.querySelectorAll('.preset-btn.delete').forEach(btn => {
-        btn.addEventListener('click', (e) => {
-            e.stopPropagation();
-            if (confirm('Are you sure you want to delete this preset?')) {
-                const index = parseInt(e.target.dataset.index);
-                const currentPresets = JSON.parse(localStorage.getItem('audio_presets') || '[]');
-                currentPresets.splice(index, 1);
-                localStorage.setItem('audio_presets', JSON.stringify(currentPresets));
-                renderPresetsInWizard(); // Re-render list
-                showMessage('Preset deleted successfully.', 'success');
-            }
+        // RIGHT COLUMN: System Presets
+        html += '<div class="presets-column system-column">';
+        html += '<h4 class="preset-group-title">🏆 Official Algorithms</h4>';
+        html += '<div class="preset-list-content">';
+        if (system.length > 0) {
+            system.forEach((preset) => {
+                html += createPresetHTML(preset, 'system');
+            });
+        }
+        html += '</div></div>'; // Close content and column
+
+        html += '</div>'; // Close split view
+
+        listDiv.innerHTML = html;
+
+        // Add click handlers for LOAD
+        listDiv.querySelectorAll('.preset-btn.load').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const type = e.target.dataset.type;
+                let preset;
+                if (type === 'system') {
+                    preset = system.find(p => p.id === e.target.dataset.id);
+                } else { // type === 'user'
+                    // For user presets, we need to fetch it from the backend list by id
+                    const presetId = parseInt(e.target.dataset.id);
+                    preset = user.find(p => p.id === presetId);
+                }
+                if (preset) {
+                    loadPresetInWizard(preset);
+                } else {
+                    showMessage('Preset not found!', 'error');
+                }
+            });
+        });
+
+        // Add click handlers for DELETE (User only)
+        listDiv.querySelectorAll('.preset-btn.delete').forEach(btn => {
+            btn.addEventListener('click', async (e) => {
+                e.stopPropagation();
+                if (!authToken) {
+                    showMessage('Please login to delete your presets.', 'error');
+                    return;
+                }
+                if (confirm('Are you sure you want to delete this preset?')) {
+                    const presetId = parseInt(e.target.dataset.id); // Get ID from data-id attribute
+
+                    try {
+                        const response = await fetch(`${API_BASE}/api/presets/${presetId}`, {
+                            method: 'DELETE',
+                            headers: getAuthHeaders()
+                        });
+                        if (handleAuthError(response)) return;
+                        if (!response.ok) throw new Error('Failed to delete cloud preset');
+
+                        renderPresetsInWizard(); // Re-render list
+                        showMessage('Preset deleted successfully from cloud.', 'success');
+                    } catch (error) {
+                        console.error('Cloud delete failed:', error);
+                        showMessage('Failed to delete preset from cloud: ' + error.message, 'error');
+                    }
+                }
+            });
         });
     });
 }
 
-function createPresetHTML(preset, type, index = null) {
+function createPresetHTML(preset, type) { // Removed index, using ID for cloud
     const isSystem = type === 'system';
     const dateStr = new Date(preset.timestamp).toLocaleDateString();
-    const loadDataAttrs = isSystem ? `data-type="system" data-id="${preset.id}"` : `data-type="user" data-index="${index}"`;
+    
+    // For user presets, data-id will be backend ID
+    // For system presets, data-id is system ID (string)
+    const loadDataAttrs = isSystem ? `data-type="system" data-id="${preset.id}"` : `data-type="user" data-id="${preset.id}"`; 
     
     let actionsHTML = `<button class="preset-btn load" ${loadDataAttrs}>Load</button>`;
     
     if (!isSystem) {
-        actionsHTML += `<button class="preset-btn delete" data-index="${index}" title="Delete Preset">✕</button>`;
+        actionsHTML += `<button class="preset-btn delete" data-id="${preset.id}" title="Delete Preset">✕</button>`;
     } else {
         actionsHTML += `<span class="system-badge" title="Official Preset">🔒</span>`;
     }
@@ -1451,13 +1500,13 @@ async function loadPresetInWizard(preset) {
         // Send preset to backend
         const response = await fetch(`${API_BASE}/api/preset/load`, {
             method: 'POST',
-            headers: { 
+            headers: {
                 'Content-Type': 'application/json',
                 ...getAuthHeaders()
             },
             body: JSON.stringify({
                 profile: preset.profile,
-                analysis: preset.analysis
+                analysis: preset.analysis || [] // analysis might be empty for cloud-saved
             })
         });
 
@@ -1497,7 +1546,7 @@ function showSavePresetModal() {
     document.getElementById('save-preset-modal').style.display = 'block';
 }
 
-function savePreset() {
+async function savePreset() {
     const nameInput = document.getElementById('preset-name-input-wizard');
     const name = nameInput.value.trim();
     
@@ -1510,33 +1559,43 @@ function savePreset() {
         alert('No profile data to save');
         return;
     }
+
+    if (!authToken) {
+        showMessage('Please login to save presets to the cloud.', 'error');
+        return;
+    }
     
-    const preset = {
-        id: Date.now().toString(),
+    const presetData = {
         name: name,
-        timestamp: new Date().toISOString(),
         profile: playlistProfile,
-        analysis: playlistAnalysis || []
+        // analysis: playlistAnalysis // analysis is not stored in cloud preset schema
     };
-    
-    // Save to localStorage
-    const currentPresets = JSON.parse(localStorage.getItem('audio_presets') || '[]');
-    currentPresets.push(preset);
-    localStorage.setItem('audio_presets', JSON.stringify(currentPresets));
-    
-    // Close modal
-    document.getElementById('save-preset-modal').style.display = 'none';
-    nameInput.value = '';
-    
-    // Refresh list if visible
-    renderPresetsInWizard();
-    
-    showMessage(`Preset "${name}" saved successfully!`, 'success');
+
+    try {
+        const response = await fetch(`${API_BASE}/api/presets`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', ...getAuthHeaders() },
+            body: JSON.stringify(presetData)
+        });
+
+        if (handleAuthError(response)) return;
+        if (!response.ok) throw new Error('Failed to save preset to cloud');
+
+        // After saving, refresh the list to show new preset
+        renderPresetsInWizard();
+        showMessage(`Preset "${name}" saved to cloud!`, 'success');
+        document.getElementById('save-preset-modal').style.display = 'none';
+        nameInput.value = '';
+
+    } catch (error) {
+        console.error('Cloud save failed:', error);
+        showMessage('Failed to save preset to cloud: ' + error.message, 'error');
+    }
 }
 
-function importPresetFile(file) {
+async function importPresetFile(file) {
     const reader = new FileReader();
-    reader.onload = (e) => {
+    reader.onload = async (e) => { // Make this async
         try {
             const preset = JSON.parse(e.target.result);
 
@@ -1555,33 +1614,33 @@ function importPresetFile(file) {
                 preset.name = file.name.replace(/\.json$/i, '');
             }
             
-            // Generate new ID if missing or collision risk (though we check duplicates)
-            if (!preset.id) {
-                preset.id = 'imported_' + Date.now();
+            // For imported, always use a new ID if saving to cloud
+            preset.id = 'imported_' + Date.now(); 
+
+            if (!authToken) {
+                showMessage('Please login to import and save presets to the cloud.', 'error');
+                return;
             }
 
-            // 2. Save to LocalStorage (if not already present)
-            const currentPresets = JSON.parse(localStorage.getItem('audio_presets') || '[]');
-            
-            // Check for duplicate ID
-            const index = currentPresets.findIndex(p => p.id === preset.id);
-            
-            if (index === -1) {
-                // Add new
-                currentPresets.push(preset);
-                localStorage.setItem('audio_presets', JSON.stringify(currentPresets));
-                
-                // 3. Refresh List UI
-                renderPresetsInWizard();
-                showMessage(`Preset "${preset.name}" imported and saved to list!`, 'success');
-            } else {
-                // Update existing? Or just notify. Let's just notify.
-                showMessage(`Preset "${preset.name}" updated in list.`, 'success');
-                currentPresets[index] = preset; // Update content just in case
-                localStorage.setItem('audio_presets', JSON.stringify(currentPresets));
-                renderPresetsInWizard();
-            }
+            // Save imported preset to cloud
+            const presetData = {
+                name: preset.name,
+                profile: preset.profile
+            };
 
+            const response = await fetch(`${API_BASE}/api/presets`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', ...getAuthHeaders() },
+                body: JSON.stringify(presetData)
+            });
+
+            if (handleAuthError(response)) return;
+            if (!response.ok) throw new Error('Failed to import and save preset to cloud');
+
+            // After saving, refresh the list to show new preset
+            renderPresetsInWizard();
+            showMessage(`Preset "${preset.name}" imported and saved to cloud!`, 'success');
+            
             // Load it into the wizard immediately
             loadPresetInWizard(preset);
 
@@ -1637,7 +1696,12 @@ function showMessage(text, type = 'success') {
     message.textContent = text;
 
     const container = document.querySelector('.wizard-step[style*="display: block"]') || document.querySelector('.wizard-step');
-    container.insertBefore(message, container.firstChild);
+    if (container) { // Ensure container exists
+        container.insertBefore(message, container.firstChild);
+    } else {
+        // Fallback for messages if wizard not visible (e.g., login screen)
+        document.body.appendChild(message);
+    }
 
     setTimeout(() => message.remove(), 5000);
 }
