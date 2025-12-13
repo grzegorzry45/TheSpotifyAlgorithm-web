@@ -26,13 +26,20 @@ oauth2_scheme = OAuth2PasswordBearer(tokenUrl="auth/login") # tokenUrl should ma
 
 def verify_password(plain_password: str, hashed_password: str) -> bool:
     """Verifies a plain password against a hashed password."""
+    # Apply the same 72-byte truncation as in get_password_hash
+    password_bytes = plain_password.encode('utf-8')
+    if len(password_bytes) > 72:
+        plain_password = password_bytes[:72].decode('utf-8', errors='ignore')
     return pwd_context.verify(plain_password, hashed_password)
 
 def get_password_hash(password: str) -> str:
     """Hashes a password. Bcrypt has max 72 bytes limit."""
-    # Bcrypt has a 72 byte limit, truncate if needed (best practice: use first 72 chars)
-    if len(password.encode('utf-8')) > 72:
-        password = password[:72]
+    # Bcrypt has a 72 byte limit, truncate if needed
+    # We must truncate by bytes, not characters (important for UTF-8)
+    password_bytes = password.encode('utf-8')
+    if len(password_bytes) > 72:
+        # Truncate to 72 bytes and decode back, ignoring incomplete characters
+        password = password_bytes[:72].decode('utf-8', errors='ignore')
     return pwd_context.hash(password)
 
 def create_access_token(data: dict, expires_delta: Optional[timedelta] = None) -> str:
