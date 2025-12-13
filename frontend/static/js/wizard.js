@@ -56,7 +56,8 @@ function initializeAuth() {
     const mainAppContent = document.getElementById('main-app-content');
     const landingHero = document.getElementById('landing-hero');
     const logoutBtnHeader = document.getElementById('logout-btn-header'); // New button
-    const userEmailDisplay = document.getElementById('user-email-display'); // User email display
+    const loggedInStatusEl = document.getElementById('logged-in-status'); // The new p tag
+    const userEmailDisplay = document.getElementById('user-email-display'); // Span inside the p tag
 
     function decodeJwt(token) {
         try {
@@ -80,17 +81,15 @@ function initializeAuth() {
             if (mainAppContent) mainAppContent.style.display = 'block';
             if (landingHero) landingHero.style.display = 'none';
             if (logoutBtnHeader) logoutBtnHeader.style.display = 'inline-block'; // Show logout
-            if (userEmailDisplay) {
-                userEmailDisplay.textContent = userEmail || '';
-                userEmailDisplay.style.display = 'inline';
-            }
+            if (loggedInStatusEl) loggedInStatusEl.style.display = 'block';
+            if (userEmailDisplay) userEmailDisplay.textContent = userEmail || '';
         } else {
             // Logged Out
             userEmail = null;
             if (mainAppContent) mainAppContent.style.display = 'none';
             if (landingHero) landingHero.style.display = 'block';
             if (logoutBtnHeader) logoutBtnHeader.style.display = 'none'; // Hide logout
-            if (userEmailDisplay) userEmailDisplay.style.display = 'none';
+            if (loggedInStatusEl) loggedInStatusEl.style.display = 'none';
         }
         // Re-render presets to reflect auth state (cloud vs system)
         renderPresetsInWizard();
