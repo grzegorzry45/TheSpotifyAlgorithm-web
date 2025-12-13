@@ -903,9 +903,9 @@ function initializeParameterSelection() {
         });
 
         // Select essential params by default (without scrolling)
-        const essential = ['spectral_rolloff', 'low_energy', 'mid_energy', 'high_energy', 'danceability', 'beat_strength'];
+        const essentialParams = ['spectral_rolloff', 'low_energy', 'mid_energy', 'high_energy', 'danceability', 'beat_strength'];
         document.querySelectorAll('input[name="wizard-param"]').forEach(cb => {
-            if (essential.includes(cb.value)) cb.checked = true;
+            if (essentialParams.includes(cb.value)) cb.checked = true;
         });
     }
 
@@ -928,9 +928,9 @@ function initializeParameterSelection() {
         });
 
         // Select essential params by default (without scrolling)
-        const essential = ['spectral_rolloff', 'low_energy', 'mid_energy', 'high_energy', 'danceability', 'beat_strength'];
+        const essentialPlaylistParams = ['spectral_rolloff', 'low_energy', 'mid_energy', 'high_energy', 'danceability', 'beat_strength'];
         document.querySelectorAll('input[name="playlist-param"]').forEach(cb => {
-            if (essential.includes(cb.value)) cb.checked = true;
+            if (essentialPlaylistParams.includes(cb.value)) cb.checked = true;
         });
     }
 }
