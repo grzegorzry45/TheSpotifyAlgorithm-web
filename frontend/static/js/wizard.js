@@ -83,6 +83,9 @@ function initializeAuth() {
             if (logoutBtnHeader) logoutBtnHeader.style.display = 'inline-block'; // Show logout
             if (loggedInStatusEl) loggedInStatusEl.style.display = 'block';
             if (userEmailDisplay) userEmailDisplay.textContent = userEmail || '';
+
+            // Fetch and display credits
+            fetchCredits();
         } else {
             // Logged Out
             userEmail = null;
@@ -90,6 +93,10 @@ function initializeAuth() {
             if (landingHero) landingHero.style.display = 'block';
             if (logoutBtnHeader) logoutBtnHeader.style.display = 'none'; // Hide logout
             if (loggedInStatusEl) loggedInStatusEl.style.display = 'none';
+
+            // Hide credits display
+            const creditsDisplayEl = document.getElementById('credits-display');
+            if (creditsDisplayEl) creditsDisplayEl.style.display = 'none';
         }
         // Re-render presets to reflect auth state (cloud vs system)
         renderPresetsInWizard();
@@ -593,6 +600,11 @@ async function analyzePlaylist() {
         playlistProfile = analyzeData.profile;
         playlistAnalysis = analyzeData.profile; // Store for preset saving
 
+        // Update credits display if available in response
+        if (analyzeData.credits_remaining !== undefined) {
+            updateCreditsDisplay(analyzeData.credits_remaining);
+        }
+
         updateProgressModal(100, 'Analysis complete!');
 
         // Hide modal with slight delay to show completion
@@ -912,6 +924,11 @@ async function compareTrack() {
         if (!response.ok) throw new Error('Comparison failed');
 
         const results = await response.json();
+
+        // Update credits display if available in response
+        if (results.credits_remaining !== undefined) {
+            updateCreditsDisplay(results.credits_remaining);
+        }
 
         // Hide modal and immediately display results
         hideProgressModal();
@@ -1717,3 +1734,131 @@ function highlightPresetButton(selectedButtonId) {
         document.getElementById(selectedButtonId)?.classList.add('active-preset-btn');
     }
 }
+
+// ===== CREDITS SYSTEM =====
+
+async function fetchCredits() {
+    if (!authToken) return;
+
+    try {
+        const response = await fetch(`${API_BASE}/api/credits/balance`, {
+            headers: getAuthHeaders()
+        });
+
+        if (handleAuthError(response)) return;
+
+        if (response.ok) {
+            const data = await response.json();
+            updateCreditsDisplay(data.credits);
+        }
+    } catch (error) {
+        console.error('Failed to fetch credits:', error);
+    }
+}
+
+function updateCreditsDisplay(credits) {
+    const creditsAmountEl = document.getElementById('credits-amount');
+    const creditsDisplayEl = document.getElementById('credits-display');
+
+    if (creditsAmountEl) {
+        creditsAmountEl.textContent = credits;
+    }
+
+    // Show/hide credits display based on auth
+    if (creditsDisplayEl) {
+        creditsDisplayEl.style.display = authToken ? 'block' : 'none';
+    }
+}
+
+// Initialize coupon modal
+function initializeCouponModal() {
+    const addCreditsBtn = document.getElementById('add-credits-btn');
+    const couponModal = document.getElementById('coupon-modal');
+    const couponCancelBtn = document.getElementById('coupon-cancel-btn');
+    const redeemCouponBtn = document.getElementById('redeem-coupon-btn');
+    const couponCodeInput = document.getElementById('coupon-code-input');
+    const couponMessageEl = document.getElementById('coupon-message');
+
+    // Open modal
+    addCreditsBtn?.addEventListener('click', () => {
+        if (couponModal) {
+            couponModal.style.display = 'flex';
+            couponCodeInput.value = '';
+            couponMessageEl.style.display = 'none';
+            couponMessageEl.textContent = '';
+        }
+    });
+
+    // Close modal
+    couponCancelBtn?.addEventListener('click', () => {
+        if (couponModal) couponModal.style.display = 'none';
+    });
+
+    // Redeem coupon
+    redeemCouponBtn?.addEventListener('click', async () => {
+        const code = couponCodeInput?.value.trim();
+
+        if (!code) {
+            showCouponMessage('Please enter a coupon code', 'error');
+            return;
+        }
+
+        if (!authToken) {
+            showCouponMessage('Please login first', 'error');
+            return;
+        }
+
+        try {
+            const response = await fetch(`${API_BASE}/api/credits/redeem`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    ...getAuthHeaders()
+                },
+                body: JSON.stringify({ code: code.toUpperCase() })
+            });
+
+            const data = await response.json();
+
+            if (response.ok) {
+                // Success!
+                showCouponMessage(data.message, 'success');
+                updateCreditsDisplay(data.new_balance);
+
+                // Clear input and close modal after 2s
+                setTimeout(() => {
+                    if (couponModal) couponModal.style.display = 'none';
+                    couponCodeInput.value = '';
+                }, 2000);
+
+            } else {
+                // Error
+                showCouponMessage(data.detail || 'Failed to redeem coupon', 'error');
+            }
+
+        } catch (error) {
+            showCouponMessage('Failed to redeem coupon', 'error');
+            console.error('Coupon redemption error:', error);
+        }
+    });
+
+    function showCouponMessage(message, type) {
+        if (!couponMessageEl) return;
+
+        couponMessageEl.textContent = message;
+        couponMessageEl.style.display = 'block';
+
+        if (type === 'success') {
+            couponMessageEl.style.backgroundColor = '#1DB954';
+            couponMessageEl.style.color = '#fff';
+        } else {
+            couponMessageEl.style.backgroundColor = '#ff4444';
+            couponMessageEl.style.color = '#fff';
+        }
+    }
+}
+
+// Call this on page load
+document.addEventListener('DOMContentLoaded', () => {
+    initializeCouponModal();
+});

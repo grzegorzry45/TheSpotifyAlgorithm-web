@@ -89,6 +89,33 @@ audio_processor = AudioProcessor()
 # In-memory storage for session data - TODO: Move to database later
 sessions = {}
 
+# CREDIT MANAGEMENT CONSTANTS
+ANALYSIS_COST = 100  # Cost per analysis in credits
+
+# Helper functions for credit management
+def check_credits(user: models.User, cost: int):
+    """Check if user has enough credits"""
+    if user.credits < cost:
+        raise HTTPException(
+            status_code=402,  # Payment Required
+            detail=f"Not enough credits. Need {cost}, have {user.credits}"
+        )
+
+def deduct_credits(user: models.User, cost: int, db: Session, description: str):
+    """Deduct credits from user and log transaction"""
+    user.credits -= cost
+
+    # Log transaction
+    transaction = models.CreditTransaction(
+        user_id=user.id,
+        amount=-cost,
+        transaction_type="analysis_cost",
+        description=description
+    )
+    db.add(transaction)
+    db.commit()
+    db.refresh(user)
+
 @app.get("/", response_class=HTMLResponse)
 async def root():
     """Serve the simplified wizard frontend (feature branch)"""
@@ -213,10 +240,12 @@ async def upload_user_tracks(
 @app.post("/api/analyze/playlist")
 async def analyze_playlist(
     request: dict,
-    current_user: models.User = Depends(auth.get_current_user)
+    current_user: models.User = Depends(auth.get_current_user),
+    db: Session = Depends(database.get_db)
 ):
     """
     Analyze uploaded playlist and create sonic profile
+    Cost: 100 credits per analysis
     """
     session_id = request.get("session_id")
     additional_params = request.get("additional_params", [])
@@ -234,6 +263,9 @@ async def analyze_playlist(
             status_code=400,
             detail="Please select at least one parameter to analyze"
         )
+
+    # Check credits BEFORE analysis
+    check_credits(current_user, ANALYSIS_COST)
 
     # Analyze all tracks
     results = []
@@ -264,10 +296,19 @@ async def analyze_playlist(
     sessions[session_id]["playlist_profile"] = profile
     sessions[session_id]["playlist_analysis"] = results
 
+    # Deduct credits AFTER successful analysis
+    deduct_credits(
+        current_user,
+        ANALYSIS_COST,
+        db,
+        f"Playlist analysis: {len(results)} tracks"
+    )
+
     return {
         "tracks_analyzed": len(results),
         "errors": errors,
         "profile": profile,
+        "credits_remaining": current_user.credits,
         "message": "Playlist analysis complete"
     }
 
@@ -275,11 +316,13 @@ async def analyze_playlist(
 @app.post("/api/compare/batch")
 async def compare_batch(
     request: dict,
-    current_user: models.User = Depends(auth.get_current_user)
+    current_user: models.User = Depends(auth.get_current_user),
+    db: Session = Depends(database.get_db)
 ):
     """
     Compare user tracks against playlist profile
     Returns recommendations for all tracks
+    Cost: 100 credits per analysis
     """
     session_id = request.get("session_id")
     additional_params = request.get("additional_params", [])
@@ -301,6 +344,9 @@ async def compare_batch(
             status_code=400,
             detail="Please analyze playlist first"
         )
+
+    # Check credits BEFORE analysis
+    check_credits(current_user, ANALYSIS_COST)
 
     user_files = session.get("user_files", [])
     if not user_files:
@@ -334,9 +380,18 @@ async def compare_batch(
 
     session["recommendations"] = recommendations
 
+    # Deduct credits AFTER successful comparison
+    deduct_credits(
+        current_user,
+        ANALYSIS_COST,
+        db,
+        f"Batch comparison: {len(recommendations)} tracks"
+    )
+
     return {
         "tracks_compared": len(recommendations),
-        "recommendations": recommendations
+        "recommendations": recommendations,
+        "credits_remaining": current_user.credits
     }
 
 
@@ -347,11 +402,13 @@ async def compare_single(
     reference_track: Optional[UploadFile] = File(None),
     session_id: Optional[str] = Form(None),
     additional_params: Optional[str] = Form(None),
-    current_user: models.User = Depends(auth.get_current_user)
+    current_user: models.User = Depends(auth.get_current_user),
+    db: Session = Depends(database.get_db)
 ):
     """
     Compare single track vs playlist or vs another track
     Modes: 'playlist' or 'track'
+    Cost: 100 credits per analysis
     """
     # Parse additional parameters if provided
     params_list = []
@@ -372,6 +429,9 @@ async def compare_single(
             status_code=400,
             detail="Please select at least one parameter to analyze"
         )
+
+    # Check credits BEFORE analysis
+    check_credits(current_user, ANALYSIS_COST)
 
     # For track mode, create temporary session if needed
     if mode == "track":
@@ -416,12 +476,21 @@ async def compare_single(
             comparison = comparator.compare_track(user_features)
             recommendations = comparator.generate_recommendations(comparison)
 
+            # Deduct credits AFTER successful comparison
+            deduct_credits(
+                current_user,
+                ANALYSIS_COST,
+                db,
+                f"Single comparison (playlist mode): {user_features.get('filename', 'unknown')}"
+            )
+
             return {
                 "mode": "playlist",
                 "user_track": user_features,
                 "playlist_profile": session["playlist_profile"],
                 "comparison": comparison,
-                "recommendations": recommendations
+                "recommendations": recommendations,
+                "credits_remaining": current_user.credits
             }
         except Exception as e:
             print(f"Error during playlist comparison: {e}")
@@ -460,12 +529,21 @@ async def compare_single(
             track_comparator = TrackComparator(ref_features)
             recommendations = track_comparator.compare_track(user_features)
 
+            # Deduct credits AFTER successful comparison
+            deduct_credits(
+                current_user,
+                ANALYSIS_COST,
+                db,
+                f"Single comparison (1:1 mode): {user_features.get('filename', 'unknown')} vs {ref_features.get('filename', 'unknown')}"
+            )
+
             return {
                 "mode": "track",
                 "user_track": user_features,
                 "reference_track": ref_features,
                 "comparison": recommendations,  # compare_track already returns recommendations
-                "recommendations": recommendations
+                "recommendations": recommendations,
+                "credits_remaining": current_user.credits
             }
         except Exception as e:
             print(f"Error during track comparison: {e}")
@@ -565,6 +643,93 @@ async def load_preset(
     return {
         "session_id": session_id,
         "message": "Preset loaded successfully"
+    }
+
+
+# CREDIT MANAGEMENT ENDPOINTS
+
+@app.get("/api/credits/balance", response_model=schemas.CreditsBalance)
+async def get_credits_balance(
+    current_user: models.User = Depends(auth.get_current_user)
+):
+    """Get current user's credit balance"""
+    return {"credits": current_user.credits}
+
+
+@app.post("/api/credits/redeem", response_model=schemas.CouponRedeemResponse)
+async def redeem_coupon(
+    request: schemas.CouponRedeemRequest,
+    current_user: models.User = Depends(auth.get_current_user),
+    db: Session = Depends(database.get_db)
+):
+    """
+    Redeem a coupon code to add credits to user account
+    """
+    code = request.code.upper().strip()
+
+    # Find coupon
+    coupon = db.query(models.Coupon).filter(
+        models.Coupon.code == code
+    ).first()
+
+    if not coupon:
+        raise HTTPException(status_code=404, detail="Invalid coupon code")
+
+    # Validate: Is active?
+    if not coupon.is_active:
+        raise HTTPException(status_code=400, detail="This coupon is no longer active")
+
+    # Validate: Not expired?
+    if coupon.expires_at:
+        from datetime import datetime
+        if coupon.expires_at < datetime.utcnow():
+            raise HTTPException(status_code=400, detail="This coupon has expired")
+
+    # Validate: Not over max uses?
+    if coupon.max_uses and coupon.current_uses >= coupon.max_uses:
+        raise HTTPException(status_code=400, detail="This coupon has been fully redeemed")
+
+    # Validate: User hasn't used this coupon before?
+    existing = db.query(models.CouponRedemption).filter(
+        models.CouponRedemption.coupon_id == coupon.id,
+        models.CouponRedemption.user_id == current_user.id
+    ).first()
+
+    if existing:
+        raise HTTPException(
+            status_code=400,
+            detail="You have already used this coupon"
+        )
+
+    # All checks passed - Add credits
+    current_user.credits += coupon.credits
+    coupon.current_uses += 1
+
+    # Log redemption
+    redemption = models.CouponRedemption(
+        coupon_id=coupon.id,
+        user_id=current_user.id,
+        credits_added=coupon.credits
+    )
+    db.add(redemption)
+
+    # Log transaction
+    transaction = models.CreditTransaction(
+        user_id=current_user.id,
+        amount=coupon.credits,
+        transaction_type="coupon_redeemed",
+        description=f"Redeemed coupon: {coupon.code}"
+    )
+    db.add(transaction)
+
+    db.commit()
+    db.refresh(current_user)
+
+    return {
+        "success": True,
+        "credits_added": coupon.credits,
+        "new_balance": current_user.credits,
+        "message": f"Success! Added {coupon.credits} credits to your account"
     }
 
 
