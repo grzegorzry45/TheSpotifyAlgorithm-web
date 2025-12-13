@@ -18,6 +18,15 @@
         </div>
     </header>
 
+    <!-- Landing Hero (Visible when logged out) -->
+    <div id="landing-hero" class="landing-hero" style="text-align: center; padding: 50px 20px;">
+        <div class="hero-actions" style="display: flex; gap: 20px; justify-content: center; margin-top: 30px;">
+            <button id="hero-login-btn" class="btn btn-primary" style="padding: 15px 40px; font-size: 18px;">Login</button>
+            <button id="hero-register-btn" class="btn btn-secondary" style="padding: 15px 40px; font-size: 18px;">Register</button>
+        </div>
+    </div>
+
+    <div id="main-app-content" style="display: none;">
     <!-- Progress Indicator -->
     <div class="wizard-progress">
         <div class="progress-step active" data-step="1">
@@ -235,6 +244,7 @@
         </div>
 
     </div>
+    </div> <!-- End main-app-content -->
 
     <!-- Session Data (hidden) -->
     <div id="session-data" style="display: none;">

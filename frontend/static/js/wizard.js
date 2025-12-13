@@ -56,23 +56,50 @@ function initializeAuth() {
     const loginModal = document.getElementById('login-modal');
     const registerModal = document.getElementById('register-modal');
     
-    // Check if logged in
-    if (authToken) {
-        if (loginBtn) {
-            loginBtn.textContent = 'Logout';
-            loginBtn.classList.replace('btn-secondary', 'btn-primary');
+    // UI Elements for Auth State
+    const mainAppContent = document.getElementById('main-app-content');
+    const landingHero = document.getElementById('landing-hero');
+
+    function updateUIState() {
+        if (authToken) {
+            // Logged In
+            if (loginBtn) {
+                loginBtn.textContent = 'Logout';
+                loginBtn.classList.replace('btn-secondary', 'btn-primary');
+            }
+            if (mainAppContent) mainAppContent.style.display = 'block';
+            if (landingHero) landingHero.style.display = 'none';
+        } else {
+            // Logged Out
+            if (loginBtn) {
+                loginBtn.textContent = 'Login';
+                loginBtn.classList.replace('btn-primary', 'btn-secondary');
+            }
+            if (mainAppContent) mainAppContent.style.display = 'none';
+            if (landingHero) landingHero.style.display = 'block';
         }
     }
 
-    // Login Button Click
+    // Initial State Check
+    updateUIState();
+
+    // Hero Buttons
+    document.getElementById('hero-login-btn')?.addEventListener('click', () => {
+        if (loginModal) loginModal.style.display = 'flex';
+    });
+
+    document.getElementById('hero-register-btn')?.addEventListener('click', () => {
+        if (registerModal) registerModal.style.display = 'flex';
+    });
+
+    // Login Button Click (Header)
     if (loginBtn) {
         loginBtn.addEventListener('click', () => {
             if (authToken) {
                 // Handle Logout
                 authToken = null;
                 localStorage.removeItem('access_token');
-                loginBtn.textContent = 'Login';
-                loginBtn.classList.replace('btn-primary', 'btn-secondary');
+                updateUIState();
                 showMessage('Logged out successfully', 'success');
             } else {
                 // Show Login Modal
@@ -106,11 +133,7 @@ function initializeAuth() {
             authToken = data.access_token;
             localStorage.setItem('access_token', authToken);
             
-            // Update UI
-            if (loginBtn) {
-                loginBtn.textContent = 'Logout';
-                loginBtn.classList.replace('btn-secondary', 'btn-primary');
-            }
+            updateUIState();
             if (loginModal) loginModal.style.display = 'none';
             showMessage('Login successful!', 'success');
             
@@ -169,10 +192,7 @@ function initializeAuth() {
                 const data = await loginResp.json();
                 authToken = data.access_token;
                 localStorage.setItem('access_token', authToken);
-                if (loginBtn) {
-                    loginBtn.textContent = 'Logout';
-                    loginBtn.classList.replace('btn-secondary', 'btn-primary');
-                }
+                updateUIState();
             }
 
             if (registerModal) registerModal.style.display = 'none';
