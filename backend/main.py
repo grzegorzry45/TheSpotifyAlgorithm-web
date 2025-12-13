@@ -18,7 +18,10 @@ from fastapi.security import OAuth2PasswordRequestForm
 from datetime import timedelta
 
 # Import database and models for authentication
-import models, database, schemas, auth
+import models
+import database
+import schemas
+import auth
 
 # Import analysis modules
 from core.audio_processor import AudioProcessor
@@ -308,6 +311,7 @@ async def compare_batch(
 
     # Analyze user tracks with additional parameters
     user_results = []
+    errors = []
     for file_path in user_files:
         try:
             features = audio_processor.analyze_file(file_path, additional_params=additional_params)
@@ -315,7 +319,7 @@ async def compare_batch(
                 features['filename'] = Path(file_path).name
                 user_results.append(features)
         except Exception as e:
-            print(f"Error analyzing {file_path}: {e}")
+            errors.append(f"{Path(file_path).name}: {str(e)}")
 
     # Compare against playlist
     comparator = PlaylistComparator(
@@ -358,13 +362,8 @@ async def compare_single(
     if additional_params:
         try:
             params_list = json.loads(additional_params)
-            print(f"DEBUG: Received additional_params: {additional_params}")
-            print(f"DEBUG: Parsed params_list: {params_list}")
         except json.JSONDecodeError:
-            print(f"DEBUG: Failed to parse additional_params: {additional_params}")
             params_list = []
-    else:
-        print(f"DEBUG: No additional_params received")
 
     # Validate that parameters are selected
     if not params_list or len(params_list) == 0:
@@ -424,9 +423,6 @@ async def compare_single(
                 "recommendations": recommendations
             }
         except Exception as e:
-            print(f"Error during playlist comparison: {e}")
-            import traceback
-            traceback.print_exc()
             raise HTTPException(
                 status_code=500,
                 detail=f"Playlist comparison failed: {str(e)}"
@@ -468,9 +464,6 @@ async def compare_single(
                 "recommendations": recommendations
             }
         except Exception as e:
-            print(f"Error during track comparison: {e}")
-            import traceback
-            traceback.print_exc()
             raise HTTPException(
                 status_code=500,
                 detail=f"Track comparison failed: {str(e)}"
@@ -633,29 +626,6 @@ def delete_preset(
 async def health_check():
     """Health check endpoint"""
     return {"status": "ok", "service": "The Algorithm API"}
-
-
-@app.get("/api/test")
-async def test_endpoint():
-    """Simple test endpoint - no processing"""
-    return {
-        "status": "success",
-        "message": "Backend is working!",
-        "timestamp": "2025-12-06",
-        "test": "passed"
-    }
-
-
-@app.post("/api/test-upload")
-async def test_upload(file: UploadFile = File(...)):
-    """Test file upload without processing"""
-    return {
-        "status": "success",
-        "filename": file.filename,
-        "content_type": file.content_type,
-        "size_kb": len(await file.read()) / 1024,
-        "message": "File received successfully (not analyzed)"
-    }
 
 
 # Mount static files for frontend

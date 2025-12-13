@@ -23,9 +23,6 @@ let isProcessing = false;
 
 // Initialize on page load
 document.addEventListener('DOMContentLoaded', () => {
-    console.log("DOM Content Loaded - App.js starting");
-    // alert("DEBUG: JS is running! v2"); // Temporary debug alert
-
     // TEMPORARILY DISABLED: Authentication suspended for public beta
     // initializeAuthUI();
     checkAuthAndRenderUI(); // Check auth status on page load (now always shows app)
@@ -151,7 +148,6 @@ function updateUIForAuth(isLoggedIn) {
 }
 
 function initializeAuthUI() {
-    console.log("Initializing Auth UI");
     const loginBtn = document.getElementById('login-btn');
     const registerBtn = document.getElementById('register-btn');
     const logoutBtn = document.getElementById('logout-btn');
@@ -165,15 +161,7 @@ function initializeAuthUI() {
     const loginConfirm = document.getElementById('login-confirm');
     const registerConfirm = document.getElementById('register-confirm');
 
-    console.log("Elements check:", {
-        loginBtn: !!loginBtn,
-        loginModal: !!loginModal,
-        registerBtn: !!registerBtn,
-        registerModal: !!registerModal
-    });
-
     if(loginBtn) loginBtn.addEventListener('click', () => {
-        console.log("Login button clicked");
         if(loginModal) {
             // Fix: Move to body if nested inside hidden container
             if (loginModal.parentNode !== document.body) {
@@ -183,7 +171,6 @@ function initializeAuthUI() {
         }
     });
     if(registerBtn) registerBtn.addEventListener('click', () => {
-        console.log("Register button clicked");
         if(registerModal) {
              // Fix: Move to body if nested inside hidden container
             if (registerModal.parentNode !== document.body) {
@@ -1332,7 +1319,8 @@ function showError(message) {
 }
 
 function showSuccess(message) {
-    console.log(message);
+    // Success messages could be displayed in a notification system
+    // For now, silent success (no console spam)
 }
 
 // ===== PRESETS MANAGEMENT =====

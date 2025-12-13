@@ -36,7 +36,6 @@ class AudioProcessor:
         Returns:
             Dictionary of audio features or None if error
         """
-        print(f"DEBUG audio_processor: fast_mode={fast_mode}, additional_params={additional_params}")
         try:
             # Load audio (mono only for speed initially)
             y, sr = librosa.load(file_path, sr=self.sr, mono=True)
@@ -45,7 +44,6 @@ class AudioProcessor:
             if fast_mode:
                 # USER SELECTED MODE: Extract ONLY the parameters user selected
                 if additional_params and len(additional_params) > 0:
-                    print(f"DEBUG: Extracting ONLY user-selected parameters: {additional_params}")
                     features = {}
 
                     # Check if stereo is needed
@@ -63,8 +61,7 @@ class AudioProcessor:
 
                     return features
                 else:
-                    # No parameters selected - return error message
-                    print(f"DEBUG: No parameters selected by user")
+                    # No parameters selected - return None
                     return None
 
             # FULL MODE: All features (slower, for local use)
@@ -130,8 +127,8 @@ class AudioProcessor:
 
             return features
 
-        except Exception as e:
-            print(f"Error analyzing {file_path}: {e}")
+        except Exception:
+            # Return None on error - caller will handle error reporting
             return None
 
     def extract_bpm(self, y: np.ndarray, sr: int) -> float:
@@ -1077,15 +1074,14 @@ class AudioProcessor:
                 result[param] = self.extract_energy_curve(y, sr)
             elif param == 'call_response_presence':
                 result[param] = self.extract_call_response(y, sr)
-        except Exception as e:
-            print(f"Error extracting {param}: {e}")
+        except Exception:
+            # On error, use default value
             result[param] = 0.0
 
         # Validate extracted values - replace NaN/inf with safe defaults
         for key, value in result.items():
             if isinstance(value, (int, float)):
                 if np.isnan(value) or np.isinf(value):
-                    print(f"Warning: {key} returned invalid value ({value}), using 0.0")
                     result[key] = 0.0
 
         return result

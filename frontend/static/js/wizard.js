@@ -258,12 +258,10 @@ function updateProgressModal(progress, message) {
 
 // Initialize on page load
 document.addEventListener('DOMContentLoaded', () => {
-    console.log("Wizard interface loaded");
     initializeWizard();
 });
 
 function initializeWizard() {
-    console.log("Initializing Wizard...");
     try {
         // Initialize Auth first
         initializeAuth();
