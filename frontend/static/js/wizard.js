@@ -149,24 +149,35 @@ function initializeReferenceSelection() {
 
     // Save preset button
     document.getElementById('save-playlist-preset-btn')?.addEventListener('click', showSavePresetModal);
-
-    // Preset loading
-    document.getElementById('import-preset-wizard-btn')?.addEventListener('click', () => {
-        document.getElementById('import-preset-wizard-file').click();
+    document.getElementById('export-preset-file-btn')?.addEventListener('click', exportPresetToFile);
+    document.getElementById('preset-save-confirm-wizard')?.addEventListener('click', savePreset);
+    document.getElementById('preset-save-cancel-wizard')?.addEventListener('click', () => {
+        document.getElementById('save-preset-modal').style.display = 'none';
     });
+}
 
-    document.getElementById('import-preset-wizard-file')?.addEventListener('change', (e) => {
-        if (e.target.files.length > 0) {
-            importPresetFile(e.target.files[0]);
-        }
-    });
-
-    // Single reference track
-    const referenceUploadZone = document.getElementById('reference-track-upload');
-    const referenceFileInput = document.getElementById('reference-track-file');
-    setupDragDrop(referenceUploadZone, referenceFileInput, handleReferenceTrack);
-
-    document.getElementById('confirm-reference-btn')?.addEventListener('click', confirmReferenceTrack);
+function exportPresetToFile() {
+    if (!playlistProfile) {
+        showMessage('No playlist profile to export', 'error');
+        return;
+    }
+    
+    const data = {
+        profile: playlistProfile,
+        analysis: playlistAnalysis || [],
+        exported_at: new Date().toISOString(),
+        version: "2.0"
+    };
+    
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `preset_profile_${new Date().toISOString().slice(0,10)}.json`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
 }
 
 function selectReferenceType(type) {
@@ -258,24 +269,41 @@ async function analyzePlaylist() {
         // Create abort controller
         abortController = new AbortController();
 
-        updateProgressModal(10, 'Uploading files...');
+        updateProgressModal(0, `Starting upload of ${playlistFiles.length} files...`);
 
-        // Upload files
+        // Upload files with progress
         const formData = new FormData();
         playlistFiles.forEach(file => formData.append('files', file));
-
-        const uploadResponse = await fetch(`${API_BASE}/api/upload/playlist`, {
-            method: 'POST',
-            body: formData,
-            signal: abortController.signal
+        
+        // Use XHR for upload progress
+        const uploadResponse = await new Promise((resolve, reject) => {
+            const xhr = new XMLHttpRequest();
+            xhr.open('POST', `${API_BASE}/api/upload/playlist`);
+            
+            xhr.upload.onprogress = (e) => {
+                if (e.lengthComputable) {
+                    const percent = (e.loaded / e.total) * 40; // Allocate 40% for upload
+                    const mbLoaded = (e.loaded / 1024 / 1024).toFixed(1);
+                    const mbTotal = (e.total / 1024 / 1024).toFixed(1);
+                    updateProgressModal(percent, `Uploading: ${mbLoaded}MB / ${mbTotal}MB (${playlistFiles.length} files)`);
+                }
+            };
+            
+            xhr.onload = () => {
+                if (xhr.status >= 200 && xhr.status < 300) {
+                    resolve(JSON.parse(xhr.responseText));
+                } else {
+                    reject(new Error('Upload failed'));
+                }
+            };
+            
+            xhr.onerror = () => reject(new Error('Upload network error'));
+            xhr.send(formData);
         });
 
-        if (!uploadResponse.ok) throw new Error('Upload failed');
+        sessionId = uploadResponse.session_id;
 
-        const uploadData = await uploadResponse.json();
-        sessionId = uploadData.session_id;
-
-        updateProgressModal(40, 'Analyzing audio features...');
+        updateProgressModal(40, `Analyzing ${playlistFiles.length} tracks... This may take a minute.`);
 
         // Get selected parameters from playlist params
         const selectedParams = getPlaylistParameters();

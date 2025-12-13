@@ -115,20 +115,22 @@
                     </div>
                 </div>
 
-                <button id="analyze-playlist-btn" class="btn btn-secondary" disabled>Analyze Playlist →</button>
+                <button id="analyze-playlist-btn" class="btn btn-primary" style="width: 100%;" disabled>Analyze Playlist & Create Profile →</button>
                 <div id="playlist-progress" class="progress-container" style="display: none;">
                     <div class="progress-bar">
                         <div class="progress-fill" id="playlist-progress-fill"></div>
                     </div>
                     <p class="progress-text" id="playlist-progress-text">Processing...</p>
+                    <p class="progress-detail" id="playlist-progress-detail" style="font-size: 0.9em; color: #888; margin-top: 5px;"></p>
                 </div>
 
                 <!-- Playlist Results -->
                 <div id="playlist-results" class="results-summary" style="display: none; margin-top: 30px;">
                     <h3>✓ Playlist Profile Created</h3>
                     <div id="playlist-profile-display" class="param-comparison-grid"></div>
-                    <div style="margin-top: 25px; display: flex; gap: 15px;">
+                    <div style="margin-top: 25px; display: flex; gap: 15px; flex-wrap: wrap;">
                         <button id="save-playlist-preset-btn" class="btn btn-primary">💾 Save as Preset</button>
+                        <button id="export-preset-file-btn" class="btn btn-secondary">📥 Export to File</button>
                     </div>
                 </div>
             </div>
