@@ -38,10 +38,9 @@ app.add_middleware(
 )
 
 # Database initialization
-# TEMPORARILY DISABLED: Authentication suspended for public beta
-# @app.on_event("startup")
-# def on_startup():
-#     models.Base.metadata.create_all(bind=database.engine)
+@app.on_event("startup")
+def on_startup():
+    models.Base.metadata.create_all(bind=database.engine)
 
 # AUTHENTICATION ENDPOINTS
 @app.post("/auth/register", response_model=schemas.User)
@@ -136,8 +135,7 @@ async def classic():
 @app.post("/api/upload/playlist")
 async def upload_playlist(
     files: List[UploadFile] = File(...),
-    # TEMPORARILY DISABLED: Authentication suspended for public beta
-    # current_user: models.User = Depends(auth.get_current_user)
+    current_user: models.User = Depends(auth.get_current_user)
 ):
     """
     Upload playlist files for analysis
@@ -183,8 +181,7 @@ async def upload_playlist(
 async def upload_user_tracks(
     files: List[UploadFile] = File(...),
     session_id: str = Form(...),
-    # TEMPORARILY DISABLED: Authentication suspended for public beta
-    # current_user: models.User = Depends(auth.get_current_user)
+    current_user: models.User = Depends(auth.get_current_user)
 ):
     """
     Upload user tracks for comparison
@@ -216,8 +213,7 @@ async def upload_user_tracks(
 @app.post("/api/analyze/playlist")
 async def analyze_playlist(
     request: dict,
-    # TEMPORARILY DISABLED: Authentication suspended for public beta
-    # current_user: models.User = Depends(auth.get_current_user)
+    current_user: models.User = Depends(auth.get_current_user)
 ):
     """
     Analyze uploaded playlist and create sonic profile
@@ -279,8 +275,7 @@ async def analyze_playlist(
 @app.post("/api/compare/batch")
 async def compare_batch(
     request: dict,
-    # TEMPORARILY DISABLED: Authentication suspended for public beta
-    # current_user: models.User = Depends(auth.get_current_user)
+    current_user: models.User = Depends(auth.get_current_user)
 ):
     """
     Compare user tracks against playlist profile
@@ -352,8 +347,7 @@ async def compare_single(
     reference_track: Optional[UploadFile] = File(None),
     session_id: Optional[str] = Form(None),
     additional_params: Optional[str] = Form(None),
-    # TEMPORARILY DISABLED: Authentication suspended for public beta
-    # current_user: models.User = Depends(auth.get_current_user)
+    current_user: models.User = Depends(auth.get_current_user)
 ):
     """
     Compare single track vs playlist or vs another track
@@ -489,8 +483,7 @@ async def compare_single(
 @app.post("/api/report/generate")
 async def generate_report(
     session_id: str,
-    # TEMPORARILY DISABLED: Authentication suspended for public beta
-    # current_user: models.User = Depends(auth.get_current_user)
+    current_user: models.User = Depends(auth.get_current_user)
 ):
     """
     Generate HTML report with all recommendations
@@ -528,8 +521,7 @@ async def generate_report(
 @app.get("/api/report/download/{session_id}")
 async def download_report(
     session_id: str,
-    # TEMPORARILY DISABLED: Authentication suspended for public beta
-    # current_user: models.User = Depends(auth.get_current_user)
+    current_user: models.User = Depends(auth.get_current_user)
 ):
     """
     Download generated report
@@ -549,8 +541,7 @@ async def download_report(
 @app.post("/api/preset/load")
 async def load_preset(
     request: dict,
-    # TEMPORARILY DISABLED: Authentication suspended for public beta
-    # current_user: models.User = Depends(auth.get_current_user)
+    current_user: models.User = Depends(auth.get_current_user)
 ):
     """
     Load preset data from frontend localStorage into backend session
@@ -580,8 +571,7 @@ async def load_preset(
 @app.delete("/api/session/{session_id}")
 async def cleanup_session(
     session_id: str,
-    # TEMPORARILY DISABLED: Authentication suspended for public beta
-    # current_user: models.User = Depends(auth.get_current_user)
+    current_user: models.User = Depends(auth.get_current_user)
 ):
     """
     Clean up session data
