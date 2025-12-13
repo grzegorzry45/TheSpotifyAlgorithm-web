@@ -893,6 +893,12 @@ function initializeParameterSelection() {
         document.querySelectorAll('input[name="wizard-param"]').forEach(checkbox => {
             checkbox.addEventListener('change', updateCompareButton);
         });
+
+        // Select essential params by default (without scrolling)
+        const essential = ['spectral_rolloff', 'low_energy', 'mid_energy', 'high_energy', 'danceability', 'beat_strength'];
+        document.querySelectorAll('input[name="wizard-param"]').forEach(cb => {
+            if (essential.includes(cb.value)) cb.checked = true;
+        });
     }
 
     // Populate parameters for Playlist Analysis (playlist-param-groups)
@@ -911,6 +917,12 @@ function initializeParameterSelection() {
         // Add change listeners to update analyze button
         document.querySelectorAll('input[name="playlist-param"]').forEach(checkbox => {
             checkbox.addEventListener('change', updateAnalyzeButton);
+        });
+
+        // Select essential params by default (without scrolling)
+        const essential = ['spectral_rolloff', 'low_energy', 'mid_energy', 'high_energy', 'danceability', 'beat_strength'];
+        document.querySelectorAll('input[name="playlist-param"]').forEach(cb => {
+            if (essential.includes(cb.value)) cb.checked = true;
         });
     }
 }
@@ -988,6 +1000,11 @@ function updateAnalyzeButton() {
     const hasParams = getPlaylistParameters().length > 0;
     if (analyzeBtn) {
         analyzeBtn.disabled = !(hasFiles && hasParams);
+        // Visual feedback if files are ready but params are not?
+        if (hasFiles && !hasParams) {
+             // Maybe we should auto-select essential params if none selected?
+             // checking this on click would be better, but for now let's just leave it.
+        }
     }
 }
 
