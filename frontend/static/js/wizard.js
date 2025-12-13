@@ -51,32 +51,40 @@ function handleAuthError(response) {
     return false;
 }
 
+function handleAuthError(response) {
+    if (response.status === 401) {
+        showMessage('Session expired. Please login again.', 'error');
+        authToken = null;
+        localStorage.removeItem('access_token');
+        // No header loginBtn to update text/class on, it's removed
+        const loginModal = document.getElementById('login-modal');
+        if (loginModal) loginModal.style.display = 'flex';
+        return true;
+    }
+    return false;
+}
+
 function initializeAuth() {
-    const loginBtn = document.getElementById('login-btn');
+    // const loginBtn = document.getElementById('login-btn'); // Removed as per user request
     const loginModal = document.getElementById('login-modal');
     const registerModal = document.getElementById('register-modal');
     
     // UI Elements for Auth State
     const mainAppContent = document.getElementById('main-app-content');
     const landingHero = document.getElementById('landing-hero');
+    const logoutBtnHeader = document.getElementById('logout-btn-header'); // New button
 
     function updateUIState() {
         if (authToken) {
             // Logged In
-            if (loginBtn) {
-                loginBtn.textContent = 'Logout';
-                loginBtn.classList.replace('btn-secondary', 'btn-primary');
-            }
             if (mainAppContent) mainAppContent.style.display = 'block';
             if (landingHero) landingHero.style.display = 'none';
+            if (logoutBtnHeader) logoutBtnHeader.style.display = 'inline-block'; // Show logout
         } else {
             // Logged Out
-            if (loginBtn) {
-                loginBtn.textContent = 'Login';
-                loginBtn.classList.replace('btn-primary', 'btn-secondary');
-            }
             if (mainAppContent) mainAppContent.style.display = 'none';
             if (landingHero) landingHero.style.display = 'block';
+            if (logoutBtnHeader) logoutBtnHeader.style.display = 'none'; // Hide logout
         }
     }
 
@@ -92,19 +100,13 @@ function initializeAuth() {
         if (registerModal) registerModal.style.display = 'flex';
     });
 
-    // Login Button Click (Header)
-    if (loginBtn) {
-        loginBtn.addEventListener('click', () => {
-            if (authToken) {
-                // Handle Logout
-                authToken = null;
-                localStorage.removeItem('access_token');
-                updateUIState();
-                showMessage('Logged out successfully', 'success');
-            } else {
-                // Show Login Modal
-                if (loginModal) loginModal.style.display = 'flex';
-            }
+    // New Logout Button in Header
+    if (logoutBtnHeader) {
+        logoutBtnHeader.addEventListener('click', () => {
+            authToken = null;
+            localStorage.removeItem('access_token');
+            updateUIState();
+            showMessage('Logged out successfully', 'success');
         });
     }
 
