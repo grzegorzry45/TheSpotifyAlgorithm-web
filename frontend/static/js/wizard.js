@@ -1106,6 +1106,48 @@ async function loadPresetInWizard(preset) {
     }
 }
 
+function showSavePresetModal() {
+    if (!playlistProfile) {
+        showMessage('Please analyze a playlist first', 'error');
+        return;
+    }
+    document.getElementById('save-preset-modal').style.display = 'block';
+}
+
+function savePreset() {
+    const nameInput = document.getElementById('preset-name-input-wizard');
+    const name = nameInput.value.trim();
+    
+    if (!name) {
+        alert('Please enter a preset name');
+        return;
+    }
+    
+    if (!playlistProfile) {
+        alert('No profile data to save');
+        return;
+    }
+    
+    const preset = {
+        id: Date.now().toString(),
+        name: name,
+        timestamp: new Date().toISOString(),
+        profile: playlistProfile,
+        analysis: playlistAnalysis || []
+    };
+    
+    // Save to localStorage
+    const presets = loadPresetsForWizard();
+    presets.push(preset);
+    localStorage.setItem('audio_presets', JSON.stringify(presets));
+    
+    // Close modal
+    document.getElementById('save-preset-modal').style.display = 'none';
+    nameInput.value = '';
+    
+    showMessage(`Preset "${name}" saved successfully!`, 'success');
+}
+
 function importPresetFile(file) {
     const reader = new FileReader();
     reader.onload = (e) => {
