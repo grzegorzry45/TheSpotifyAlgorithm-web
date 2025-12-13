@@ -694,6 +694,8 @@
     align-items: center;
     user-select: none;
     transition: color 0.2s ease;
+    width: fit-content; /* Make the header only as wide as its content */
+    margin: 0 auto; /* Center the header horizontally */
 }
 
 .collapsible-header:hover {
