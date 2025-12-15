@@ -1,0 +1,31 @@
+<svg width="64" height="64" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+        <linearGradient id="grad2" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" style="stop-color:#1DB954;stop-opacity:1" />
+            <stop offset="100%" style="stop-color:#1ed760;stop-opacity:1" />
+        </linearGradient>
+    </defs>
+    <!-- Lightbulb shape -->
+    <path d="M32 54 V58 M24 58 H40 M32 10 C22 10 14 18 14 28 C14 36 20 42 24 46 V50 H40 V46 C44 42 50 36 50 28 C50 18 42 10 32 10Z" stroke="url(#grad2)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <animate attributeName="stroke-opacity" values="0.6;1;0.6" dur="2s" repeatCount="indefinite" />
+    </path>
+    <!-- Filament -->
+    <path d="M28 28 L32 36 L36 28" stroke="url(#grad2)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" opacity="0.8">
+        <animate attributeName="d" values="M28 28 L32 36 L36 28;M28 30 L32 38 L36 30;M28 28 L32 36 L36 28" dur="0.5s" repeatCount="indefinite" />
+    </path>
+    <!-- Sparks/Rays -->
+    <line x1="32" y1="2" x2="32" y2="6" stroke="url(#grad2)" stroke-width="2" stroke-linecap="round" opacity="0.6">
+        <animate attributeName="y1" values="2;0;2" dur="1.5s" repeatCount="indefinite" />
+    </line>
+    <line x1="56" y1="14" x2="53" y2="17" stroke="url(#grad2)" stroke-width="2" stroke-linecap="round" opacity="0.6">
+            <animate attributeName="opacity" values="0.3;1;0.3" dur="1s" begin="0.2s" repeatCount="indefinite" />
+    </line>
+    <line x1="8" y1="14" x2="11" y2="17" stroke="url(#grad2)" stroke-width="2" stroke-linecap="round" opacity="0.6">
+            <animate attributeName="opacity" values="0.3;1;0.3" dur="1s" begin="0.4s" repeatCount="indefinite" />
+    </line>
+    <!-- Stars -->
+    <path d="M54 40 L56 36 L58 40 L62 42 L58 44 L56 48 L54 44 L50 42 Z" fill="url(#grad2)" opacity="0.5">
+        <animate attributeName="opacity" values="0;0.8;0" dur="2s" repeatCount="indefinite" />
+        <animate attributeName="transform" type="scale" values="0.5;1;0.5" dur="2s" repeatCount="indefinite" additive="sum" />
+    </path>
+</svg>

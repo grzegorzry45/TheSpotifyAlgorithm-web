@@ -42,6 +42,7 @@ document.addEventListener('DOMContentLoaded', () => {
     initializePresets();
     initializeCompareModeToggle();
     initializeCollapsibleSections();
+    initializeParamsModal(); // New Params Modal
 
     /* ORIGINAL CODE - COMMENTED OUT FOR PUBLIC BETA
     if (authToken) {
@@ -56,9 +57,71 @@ document.addEventListener('DOMContentLoaded', () => {
         initializePresets();
         initializeCompareModeToggle();
         initializeCollapsibleSections(); // New call
+        initializeParamsModal();
     }
     */
 });
+
+// ===== ADVANCED PARAMETERS MODAL =====
+let currentParamsParent = null;
+let currentParamsContainer = null;
+
+function initializeParamsModal() {
+    const modal = document.getElementById('params-modal');
+    const closeBtn = document.getElementById('close-params-modal');
+    const confirmBtn = document.getElementById('confirm-params-btn');
+    const modalBody = document.getElementById('modal-params-container');
+
+    if (!modal) return;
+
+    const openModal = (sourceWrapperId) => {
+        const wrapper = document.getElementById(sourceWrapperId);
+        if (!wrapper) return;
+
+        // Find the content to move (the .param-groups div)
+        const contentToMove = wrapper.querySelector('.param-groups');
+        
+        if (contentToMove) {
+            // Save state
+            currentParamsContainer = contentToMove;
+            currentParamsParent = wrapper;
+
+            // Move to modal
+            modalBody.innerHTML = ''; // Clear just in case
+            modalBody.appendChild(contentToMove);
+            
+            // Show modal
+            modal.style.display = 'flex';
+            document.body.style.overflow = 'hidden';
+        }
+    };
+
+    const closeModal = () => {
+        if (currentParamsContainer && currentParamsParent) {
+            // Return content to original home
+            currentParamsParent.appendChild(currentParamsContainer);
+        }
+        modal.style.display = 'none';
+        document.body.style.overflow = 'auto';
+        currentParamsContainer = null;
+        currentParamsParent = null;
+    };
+
+    // Attach listeners
+    const btnAnalyze = document.getElementById('open-params-analyze');
+    if (btnAnalyze) btnAnalyze.addEventListener('click', () => openModal('analyze-params-content'));
+
+    const btnCompare = document.getElementById('open-params-compare');
+    if (btnCompare) btnCompare.addEventListener('click', () => openModal('compare-params-content'));
+
+    if (closeBtn) closeBtn.addEventListener('click', closeModal);
+    if (confirmBtn) confirmBtn.addEventListener('click', closeModal);
+
+    // Outside click
+    window.addEventListener('click', (e) => {
+        if (e.target === modal) closeModal();
+    });
+}
 
 // ===== COLLAPSIBLE SECTIONS =====
 function initializeCollapsibleSections() {

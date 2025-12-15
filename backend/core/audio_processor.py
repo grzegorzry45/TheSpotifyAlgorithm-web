@@ -1017,8 +1017,24 @@ class AudioProcessor:
         features = features or {}
 
         try:
+            # Tier 0: Basic Stats
+            if param == 'bpm':
+                result[param] = self.extract_bpm(y, sr)
+            elif param == 'energy':
+                result[param] = self.extract_energy(y)
+            elif param == 'loudness':
+                result[param] = self.extract_loudness(y)
+            elif param == 'dynamic_range':
+                result[param] = self.extract_dynamic_range(y)
+            elif param == 'spectral_centroid':
+                result[param] = self.extract_spectral_centroid(y, sr)
+            elif param == 'key':
+                 key_data = self.extract_key(y, sr)
+                 result['key'] = key_data['key']
+                 result['key_confidence'] = key_data['confidence']
+            
             # Tier 1
-            if param == 'spectral_rolloff':
+            elif param == 'spectral_rolloff':
                 result[param] = self.extract_spectral_rolloff(y, sr)
             elif param == 'spectral_flatness':
                 result[param] = self.extract_spectral_flatness(y, sr)

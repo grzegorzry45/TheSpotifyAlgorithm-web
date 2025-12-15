@@ -31,10 +31,10 @@
         <div class="container">
             <!-- Tab Navigation -->
             <nav class="tabs">
-                <button class="tab-btn" data-tab="analyze">🎵 Your Own Playlist</button>
-                <button class="tab-btn" data-tab="library">📚 Your Songs</button>
-                <button class="tab-btn active" data-tab="compare">⚖️ Compare Your Track</button>
-                <button class="tab-btn" data-tab="recommendations">✨ Recommendations</button>
+                <button class="tab-btn" data-tab="analyze"><img src="/static/icons/upload.svg" class="icon-svg" alt=""> Your Own Playlist</button>
+                <button class="tab-btn" data-tab="library"><img src="/static/icons/library.svg" class="icon-svg" alt=""> Your Songs</button>
+                <button class="tab-btn active" data-tab="compare"><img src="/static/icons/analysis.svg" class="icon-svg" alt=""> Compare Your Track</button>
+                <button class="tab-btn" data-tab="recommendations"><img src="/static/icons/recommendations.svg" class="icon-svg" alt=""> Recommendations</button>
             </nav>
 
             <!-- Tab Content -->
@@ -49,27 +49,45 @@
 
                 <!-- Parameter Selection -->
                 <div class="parameter-selection">
-                    <h3 class="collapsible-header" data-target="analyze-params-content">Select Analysis Parameters <span class="collapse-icon">▼</span></h3>
-                    <div id="analyze-params-content" class="collapsible-content collapsed">
-                        <p class="param-hint">Choose which parameters to analyze. More parameters = slower analysis (~5-80s/track depending on selection)</p>
+                    <p class="param-hint">Choose which parameters to analyze. More parameters = slower analysis (~5-80s/track depending on selection)</p>
 
+                    <div class="param-quick-select">
+                        <button class="btn btn-secondary btn-small" id="select-essential-playlist">Essential Only (Fast)</button>
+                        <button class="btn btn-secondary btn-small" id="select-all-params-playlist">All Parameters (Thorough)</button>
+                    </div>
+
+                    <button class="btn-show-params" id="open-params-analyze">
+                        <span class="icon-gear">⚙️</span> Configure Advanced Parameters
+                    </button>
+
+                    <!-- Hidden container holding inputs, moved to modal on click -->
+                    <div id="analyze-params-content" style="display: none;">
                         <div class="param-groups" id="param-groups">
                             <div class="param-group">
-                                <h4>🎵 Tier 1: Spectral (Fast) <span class="param-time">+3-5s</span></h4>
+                                <h4><img src="/static/icons/analysis.svg" class="icon-svg small" alt=""> Tier 0: Basic Stats (Fast) <span class="param-time">+1-2s</span></h4>
+                                <label><input type="checkbox" name="param" value="bpm" checked> BPM (Tempo)</label>
+                                <label><input type="checkbox" name="param" value="key" checked> Musical Key</label>
+                                <label><input type="checkbox" name="param" value="loudness" checked> Loudness (LUFS)</label>
+                                <label><input type="checkbox" name="param" value="energy" checked> Energy Level</label>
+                                <label><input type="checkbox" name="param" value="dynamic_range"> Dynamic Range</label>
+                            </div>
+
+                            <div class="param-group">
+                                <h4><img src="/static/icons/analysis.svg" class="icon-svg small" alt=""> Tier 1: Spectral (Fast) <span class="param-time">+3-5s</span></h4>
                                 <label><input type="checkbox" name="param" value="spectral_rolloff"> Spectral Rolloff</label>
                                 <label><input type="checkbox" name="param" value="spectral_flatness"> Spectral Flatness</label>
                                 <label><input type="checkbox" name="param" value="zero_crossing_rate"> Zero Crossing Rate</label>
                             </div>
 
                             <div class="param-group">
-                                <h4>🎚️ Tier 1B: Energy Distribution (Fast) <span class="param-time">+2-5s</span></h4>
+                                <h4><img src="/static/icons/analysis.svg" class="icon-svg small" alt=""> Tier 1B: Energy Distribution (Fast) <span class="param-time">+2-5s</span></h4>
                                 <label><input type="checkbox" name="param" value="low_energy"> Low Energy (20-250Hz)</label>
                                 <label><input type="checkbox" name="param" value="mid_energy"> Mid Energy (250Hz-4kHz)</label>
                                 <label><input type="checkbox" name="param" value="high_energy"> High Energy (4kHz+)</label>
                             </div>
 
                             <div class="param-group">
-                                <h4>🎹 Tier 2: Perceptual (Medium) <span class="param-time">+5-15s</span></h4>
+                                <h4><img src="/static/icons/analysis.svg" class="icon-svg small" alt=""> Tier 2: Perceptual (Medium) <span class="param-time">+5-15s</span></h4>
                                 <label><input type="checkbox" name="param" value="danceability"> Danceability</label>
                                 <label><input type="checkbox" name="param" value="beat_strength"> Beat Strength</label>
                                 <label><input type="checkbox" name="param" value="sub_bass_presence"> Sub-Bass Presence</label>
@@ -79,7 +97,7 @@
                             </div>
 
                             <div class="param-group">
-                                <h4>🎚️ Tier 3: Production (Slow) <span class="param-time">+10-25s</span></h4>
+                                <h4><img src="/static/icons/analysis.svg" class="icon-svg small" alt=""> Tier 3: Production (Slow) <span class="param-time">+10-25s</span></h4>
                                 <label><input type="checkbox" name="param" value="loudness_range"> Loudness Range (LRA)</label>
                                 <label><input type="checkbox" name="param" value="true_peak"> True Peak</label>
                                 <label><input type="checkbox" name="param" value="crest_factor"> Crest Factor</label>
@@ -89,7 +107,7 @@
                             </div>
 
                             <div class="param-group">
-                                <h4>🎼 Tier 4: Compositional (Very Slow) <span class="param-time">+35-80s</span></h4>
+                                <h4><img src="/static/icons/analysis.svg" class="icon-svg small" alt=""> Tier 4: Compositional (Very Slow) <span class="param-time">+35-80s</span></h4>
                                 <label><input type="checkbox" name="param" value="harmonic_complexity"> Harmonic Complexity</label>
                                 <label><input type="checkbox" name="param" value="melodic_range"> Melodic Range</label>
                                 <label><input type="checkbox" name="param" value="rhythmic_density"> Rhythmic Density</label>
@@ -106,7 +124,7 @@
                 </div>
 
                 <div class="upload-zone" id="playlist-upload">
-                    <div class="upload-icon">📁</div>
+                    <div class="upload-icon"><img src="/static/icons/library.svg" class="icon-svg large" alt=""></div>
                     <h3>Drag & Drop Playlist Files</h3>
                     <p>or click to browse</p>
                     <p class="file-types">Supported: MP3, WAV, FLAC</p>
@@ -127,15 +145,15 @@
                     <button id="cancel-playlist-btn" class="btn btn-cancel">Cancel Analysis</button>
                     <div class="progress-stages" id="playlist-progress-stages">
                         <div class="progress-stage pending" data-stage="upload">
-                            <span class="progress-stage-icon">📤</span>
+                            <span class="progress-stage-icon"><img src="/static/icons/upload.svg" class="icon-svg small" alt=""></span>
                             <span class="progress-stage-text">Uploading files to server</span>
                         </div>
                         <div class="progress-stage pending" data-stage="analyze">
-                            <span class="progress-stage-icon">🔊</span>
+                            <span class="progress-stage-icon"><img src="/static/icons/analysis.svg" class="icon-svg small" alt=""></span>
                             <span class="progress-stage-text">Analyzing audio features</span>
                         </div>
                         <div class="progress-stage pending" data-stage="profile">
-                            <span class="progress-stage-icon">📊</span>
+                            <span class="progress-stage-icon"><img src="/static/icons/analysis.svg" class="icon-svg small" alt=""></span>
                             <span class="progress-stage-text">Creating sonic profile</span>
                         </div>
                         <div class="progress-stage pending" data-stage="complete">
@@ -150,16 +168,16 @@
                     <div id="playlist-profile-data" class="profile-data"></div>
 
                     <button id="save-preset-btn" class="btn btn-secondary">
-                        💾 SAVE AS PRESET
+                        <img src="/static/icons/save.svg" class="icon-svg small" alt=""> SAVE AS PRESET
                     </button>
                 </div>
 
                 <!-- PRESETS SECTION -->
                 <div class="presets-section">
-                    <h3>📁 SAVED PRESETS</h3>
+                    <h3><img src="/static/icons/save.svg" class="icon-svg medium" alt=""> SAVED PRESETS</h3>
                     <p class="presets-hint">Save analyzed playlists as presets for quick comparison later</p>
                     <div style="margin-bottom: 15px;">
-                        <button id="import-preset-btn" class="btn btn-secondary" style="padding: 8px 16px; font-size: 12px;">📥 IMPORT PRESET</button>
+                        <button id="import-preset-btn" class="btn btn-secondary" style="padding: 8px 16px; font-size: 12px;"><img src="/static/icons/library.svg" class="icon-svg small" alt=""> IMPORT PRESET</button>
                         <input type="file" id="import-preset-file" accept=".json" style="display: none;">
                     </div>
                     <div id="presets-list" class="presets-list">
@@ -176,7 +194,7 @@
                 </div>
 
                 <div class="upload-zone" id="user-tracks-upload">
-                    <div class="upload-icon">🎵</div>
+                    <div class="upload-icon"><img src="/static/icons/library.svg" class="icon-svg large" alt=""></div>
                     <h3>Drag & Drop Your Tracks</h3>
                     <p>or click to browse</p>
                     <p class="file-types">Supported: MP3, WAV, FLAC</p>
@@ -197,19 +215,19 @@
                     <button id="cancel-batch-btn" class="btn btn-cancel">Cancel Comparison</button>
                     <div class="progress-stages" id="batch-progress-stages">
                         <div class="progress-stage pending" data-stage="upload">
-                            <span class="progress-stage-icon">📤</span>
+                            <span class="progress-stage-icon"><img src="/static/icons/upload.svg" class="icon-svg small" alt=""></span>
                             <span class="progress-stage-text">Uploading your tracks</span>
                         </div>
                         <div class="progress-stage pending" data-stage="analyze">
-                            <span class="progress-stage-icon">🔊</span>
+                            <span class="progress-stage-icon"><img src="/static/icons/analysis.svg" class="icon-svg small" alt=""></span>
                             <span class="progress-stage-text">Analyzing audio features</span>
                         </div>
                         <div class="progress-stage pending" data-stage="compare">
-                            <span class="progress-stage-icon">⚖️</span>
+                            <span class="progress-stage-icon"><img src="/static/icons/analysis.svg" class="icon-svg small" alt=""></span>
                             <span class="progress-stage-text">Comparing vs playlist profile</span>
                         </div>
                         <div class="progress-stage pending" data-stage="recommendations">
-                            <span class="progress-stage-icon">💡</span>
+                            <span class="progress-stage-icon"><img src="/static/icons/recommendations.svg" class="icon-svg small" alt=""></span>
                             <span class="progress-stage-text">Generating recommendations</span>
                         </div>
                         <div class="progress-stage pending" data-stage="complete">
@@ -240,9 +258,9 @@
 
                 <!-- PRESETS SECTION FOR COMPARE -->
                 <div class="presets-section" id="compare-presets-section">
-                    <h3>📁 LOAD PLAYLIST PRESET</h3>
+                    <h3><img src="/static/icons/library.svg" class="icon-svg medium" alt=""> LOAD PLAYLIST PRESET</h3>
                     <p class="presets-hint">Load a saved playlist profile to compare your track against</p>
-                    <button id="show-preset-modal-btn" class="btn btn-primary">📂 Load Playlist Preset</button>
+                    <button id="show-preset-modal-btn" class="btn btn-primary"><img src="/static/icons/library.svg" class="icon-svg small" alt=""> Load Playlist Preset</button>
                     <div id="active-preset-info" class="active-preset-info" style="display: none;">
                         <span class="active-preset-label">Active Preset:</span>
                         <span class="active-preset-name" id="active-preset-name"></span>
@@ -252,27 +270,40 @@
 
                 <!-- Parameter Selection for Compare -->
                 <div class="parameter-selection">
-                    <h3 class="collapsible-header" data-target="compare-params-content">Select Analysis Parameters <span class="collapse-icon">▼</span></h3>
-                    <div id="compare-params-content" class="collapsible-content collapsed">
+
+                    <button class="btn-show-params" id="open-params-compare">
+                        <span class="icon-gear">⚙️</span> Configure Advanced Parameters
+                    </button>
+
+                    <div id="compare-params-content" style="display: none;">
                         <p class="param-hint">Choose which parameters to analyze. More parameters = slower analysis (~5-80s/track depending on selection)</p>
 
                         <div class="param-groups" id="param-groups-compare">
                             <div class="param-group">
-                                <h4>🎵 Tier 1: Spectral (Fast) <span class="param-time">+3-5s</span></h4>
+                                <h4><img src="/static/icons/analysis.svg" class="icon-svg small" alt=""> Tier 0: Basic Stats (Fast) <span class="param-time">+1-2s</span></h4>
+                                <label><input type="checkbox" name="param-compare" value="bpm" checked> BPM (Tempo)</label>
+                                <label><input type="checkbox" name="param-compare" value="key" checked> Musical Key</label>
+                                <label><input type="checkbox" name="param-compare" value="loudness" checked> Loudness (LUFS)</label>
+                                <label><input type="checkbox" name="param-compare" value="energy" checked> Energy Level</label>
+                                <label><input type="checkbox" name="param-compare" value="dynamic_range"> Dynamic Range</label>
+                            </div>
+
+                            <div class="param-group">
+                                <h4><img src="/static/icons/analysis.svg" class="icon-svg small" alt=""> Tier 1: Spectral (Fast) <span class="param-time">+3-5s</span></h4>
                                 <label><input type="checkbox" name="param-compare" value="spectral_rolloff"> Spectral Rolloff</label>
                                 <label><input type="checkbox" name="param-compare" value="spectral_flatness"> Spectral Flatness</label>
                                 <label><input type="checkbox" name="param-compare" value="zero_crossing_rate"> Zero Crossing Rate</label>
                             </div>
 
                             <div class="param-group">
-                                <h4>🎚️ Tier 1B: Energy Distribution (Fast) <span class="param-time">+2-5s</span></h4>
+                                <h4><img src="/static/icons/analysis.svg" class="icon-svg small" alt=""> Tier 1B: Energy Distribution (Fast) <span class="param-time">+2-5s</span></h4>
                                 <label><input type="checkbox" name="param-compare" value="low_energy"> Low Energy (20-250Hz)</label>
                                 <label><input type="checkbox" name="param-compare" value="mid_energy"> Mid Energy (250Hz-4kHz)</label>
                                 <label><input type="checkbox" name="param-compare" value="high_energy"> High Energy (4kHz+)</label>
                             </div>
 
                             <div class="param-group">
-                                <h4>🎹 Tier 2: Perceptual (Medium) <span class="param-time">+5-15s</span></h4>
+                                <h4><img src="/static/icons/analysis.svg" class="icon-svg small" alt=""> Tier 2: Perceptual (Medium) <span class="param-time">+5-15s</span></h4>
                                 <label><input type="checkbox" name="param-compare" value="danceability"> Danceability</label>
                                 <label><input type="checkbox" name="param-compare" value="beat_strength"> Beat Strength</label>
                                 <label><input type="checkbox" name="param-compare" value="sub_bass_presence"> Sub-Bass Presence</label>
@@ -282,7 +313,7 @@
                             </div>
 
                             <div class="param-group">
-                                <h4>🎚️ Tier 3: Production (Slow) <span class="param-time">+10-25s</span></h4>
+                                <h4><img src="/static/icons/analysis.svg" class="icon-svg small" alt=""> Tier 3: Production (Slow) <span class="param-time">+10-25s</span></h4>
                                 <label><input type="checkbox" name="param-compare" value="loudness_range"> Loudness Range (LRA)</label>
                                 <label><input type="checkbox" name="param-compare" value="true_peak"> True Peak</label>
                                 <label><input type="checkbox" name="param-compare" value="crest_factor"> Crest Factor</label>
@@ -292,7 +323,7 @@
                             </div>
 
                             <div class="param-group">
-                                <h4>🎼 Tier 4: Compositional (Very Slow) <span class="param-time">+35-80s</span></h4>
+                                <h4><img src="/static/icons/analysis.svg" class="icon-svg small" alt=""> Tier 4: Compositional (Very Slow) <span class="param-time">+35-80s</span></h4>
                                 <label><input type="checkbox" name="param-compare" value="harmonic_complexity"> Harmonic Complexity</label>
                                 <label><input type="checkbox" name="param-compare" value="melodic_range"> Melodic Range</label>
                                 <label><input type="checkbox" name="param-compare" value="rhythmic_density"> Rhythmic Density</label>
@@ -312,7 +343,7 @@
                     <div class="compare-section">
                         <h3>YOUR TRACK</h3>
                         <div class="upload-zone small" id="user-single-upload">
-                            <div class="upload-icon">🎧</div>
+                            <div class="upload-icon"><img src="/static/icons/library.svg" class="icon-svg medium" alt=""></div>
                             <p>Drop your track here</p>
                             <input type="file" id="user-single-file" accept=".mp3,.wav,.flac" style="display: none;">
                         </div>
@@ -322,7 +353,7 @@
                     <div class="compare-section" id="reference-section" style="display: none;">
                         <h3>REFERENCE TRACK</h3>
                         <div class="upload-zone small" id="reference-upload">
-                            <div class="upload-icon">🎼</div>
+                            <div class="upload-icon"><img src="/static/icons/library.svg" class="icon-svg medium" alt=""></div>
                             <p>Drop reference track</p>
                             <input type="file" id="reference-file" accept=".mp3,.wav,.flac" style="display: none;">
                         </div>
@@ -342,19 +373,19 @@
                     <button id="cancel-compare-btn" class="btn btn-cancel">Cancel Comparison</button>
                     <div class="progress-stages" id="compare-progress-stages">
                         <div class="progress-stage pending" data-stage="upload">
-                            <span class="progress-stage-icon">📤</span>
+                            <span class="progress-stage-icon"><img src="/static/icons/upload.svg" class="icon-svg small" alt=""></span>
                             <span class="progress-stage-text">Uploading tracks</span>
                         </div>
                         <div class="progress-stage pending" data-stage="analyze-user">
-                            <span class="progress-stage-icon">🎧</span>
+                            <span class="progress-stage-icon"><img src="/static/icons/library.svg" class="icon-svg small" alt=""></span>
                             <span class="progress-stage-text">Analyzing your track</span>
                         </div>
                         <div class="progress-stage pending" data-stage="analyze-ref">
-                            <span class="progress-stage-icon">🎼</span>
+                            <span class="progress-stage-icon"><img src="/static/icons/library.svg" class="icon-svg small" alt=""></span>
                             <span class="progress-stage-text">Analyzing reference track</span>
                         </div>
                         <div class="progress-stage pending" data-stage="compare">
-                            <span class="progress-stage-icon">⚖️</span>
+                            <span class="progress-stage-icon"><img src="/static/icons/analysis.svg" class="icon-svg small" alt=""></span>
                             <span class="progress-stage-text">Comparing parameters</span>
                         </div>
                         <div class="progress-stage pending" data-stage="complete">
@@ -392,7 +423,7 @@
     <!-- Preset Name Modal -->
     <div id="preset-modal" class="modal" style="display: none;">
         <div class="modal-content">
-            <h3>💾 Save Preset</h3>
+            <h3><img src="/static/icons/save.svg" class="icon-svg small" alt=""> Save Preset</h3>
             <p>Enter a name for this playlist profile:</p>
             <input type="text" id="preset-name-input" placeholder="e.g., Top 40 Hits 2024" maxlength="50">
             <div class="modal-buttons">
@@ -405,7 +436,7 @@
     <!-- Rename Preset Modal -->
     <div id="rename-modal" class="modal" style="display: none;">
         <div class="modal-content">
-            <h3>✏️ Rename Preset</h3>
+            <h3><img src="/static/icons/save.svg" class="icon-svg small" alt=""> Rename Preset</h3>
             <p>Enter new name:</p>
             <input type="text" id="rename-input" placeholder="New preset name" maxlength="50">
             <div class="modal-buttons">
@@ -418,7 +449,7 @@
     <!-- Load Preset Modal -->
     <div id="load-preset-modal" class="modal" style="display: none;">
         <div class="modal-content">
-            <h3>📂 Load Preset</h3>
+            <h3><img src="/static/icons/library.svg" class="icon-svg small" alt=""> Load Preset</h3>
             <p>Select a saved playlist profile to load:</p>
             <div id="modal-presets-list" class="presets-list modal-list">
                 <!-- Presets will be dynamically inserted here -->
@@ -439,7 +470,7 @@
     <!-- Login Modal -->
     <div id="login-modal" class="modal" style="display: none;">
         <div class="modal-content">
-            <h3>🔑 Login</h3>
+            <h3><img src="/static/icons/auth.svg" class="icon-svg small" alt=""> Login</h3>
             <div class="auth-form">
                 <input type="email" id="login-email" placeholder="Email" required>
                 <input type="password" id="login-password" placeholder="Password" required>
@@ -455,7 +486,7 @@
     <!-- Register Modal -->
     <div id="register-modal" class="modal" style="display: none;">
         <div class="modal-content">
-            <h3>📝 Register</h3>
+            <h3><img src="/static/icons/auth.svg" class="icon-svg small" alt=""> Register</h3>
             <div class="auth-form">
                 <input type="email" id="register-email" placeholder="Email" required>
                 <input type="password" id="register-password" placeholder="Password" required>
@@ -465,6 +496,24 @@
                     <button id="register-confirm" class="btn btn-primary">REGISTER</button>
                     <button id="register-cancel" class="btn btn-secondary">CANCEL</button>
                 </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Advanced Parameters Modal -->
+    <div id="params-modal" class="modal" style="display: none;">
+        <div class="modal-content large">
+            <div class="modal-header">
+                <h3><img src="/static/icons/analysis.svg" class="icon-svg medium" alt=""> Advanced Parameters</h3>
+                <button id="close-params-modal" style="background:none;border:none;color:#888;font-size:24px;cursor:pointer;">✕</button>
+            </div>
+            <div class="modal-body-scroll">
+                <div id="modal-params-container" class="params-grid-container">
+                    <!-- Parameters will be moved here dynamically -->
+                </div>
+            </div>
+            <div class="modal-buttons">
+                <button id="confirm-params-btn" class="btn btn-primary">CONFIRM SELECTION</button>
             </div>
         </div>
     </div>

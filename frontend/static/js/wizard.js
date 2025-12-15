@@ -288,6 +288,9 @@ function initializeWizard() {
 
         // Collapsible sections
         initializeCollapsibleSections();
+        
+        // Params Modal
+        initializeParamsModal();
 
         // Load presets if any (will be called by initializeAuth's updateUIState)
         // loadPresetsForWizard();
@@ -295,6 +298,74 @@ function initializeWizard() {
         console.error("Wizard initialization failed:", error);
         alert("Wizard initialization failed. Please reload the page. Error: " + error.message);
     }
+}
+
+// ===== PARAMS MODAL =====
+let currentParamsParent = null;
+let currentParamsContainer = null;
+
+function initializeParamsModal() {
+    const modal = document.getElementById('params-modal');
+    const closeBtn = document.getElementById('close-params-modal');
+    const confirmBtn = document.getElementById('confirm-params-btn');
+    const modalBody = document.getElementById('modal-params-container');
+
+    if (!modal) return;
+
+    const openModal = (sourceWrapperId) => {
+        const wrapper = document.getElementById(sourceWrapperId);
+        if (!wrapper) return;
+
+        // Find the content to move (the .param-groups div or direct child)
+        // In wizard html, the wrapper IS the container for params sometimes, 
+        // or contains #playlist-param-groups
+        
+        let contentToMove = wrapper.querySelector('.param-groups');
+        // If wrapper has param-groups class itself (not likely based on my html edit)
+        
+        // fallback for wizard generated content
+        if (!contentToMove && wrapper.children.length > 0) {
+             contentToMove = wrapper.firstElementChild; // likely #playlist-param-groups
+        }
+
+        if (contentToMove) {
+            // Save state
+            currentParamsContainer = contentToMove;
+            currentParamsParent = wrapper;
+
+            // Move to modal
+            modalBody.innerHTML = '';
+            modalBody.appendChild(contentToMove);
+            
+            // Show modal
+            modal.style.display = 'flex';
+            document.body.style.overflow = 'hidden';
+        }
+    };
+
+    const closeModal = () => {
+        if (currentParamsContainer && currentParamsParent) {
+            currentParamsParent.appendChild(currentParamsContainer);
+        }
+        modal.style.display = 'none';
+        document.body.style.overflow = 'auto';
+        currentParamsContainer = null;
+        currentParamsParent = null;
+    };
+
+    // Attach listeners
+    const btnPlaylist = document.getElementById('open-params-playlist');
+    if (btnPlaylist) btnPlaylist.addEventListener('click', () => openModal('playlist-param-groups-container'));
+
+    const btnUser = document.getElementById('open-params-user');
+    if (btnUser) btnUser.addEventListener('click', () => openModal('wizard-param-groups-container'));
+
+    if (closeBtn) closeBtn.addEventListener('click', closeModal);
+    if (confirmBtn) confirmBtn.addEventListener('click', closeModal);
+
+    window.addEventListener('click', (e) => {
+        if (e.target === modal) closeModal();
+    });
 }
 
 // ===== COLLAPSIBLE SECTIONS =====
@@ -1157,6 +1228,7 @@ function goToStep(stepNumber) {
 
 function initializeParameterSelection() {
     const params = {
+        'Tier 0: Basic Stats (Fast)': ['bpm', 'key', 'loudness', 'energy', 'dynamic_range'],
         'Tier 1: Spectral (Fast)': ['spectral_rolloff', 'spectral_flatness', 'zero_crossing_rate'],
         'Tier 1B: Energy Distribution': ['low_energy', 'mid_energy', 'high_energy'],
         'Tier 2: Perceptual': ['danceability', 'beat_strength', 'sub_bass_presence', 'stereo_width', 'valence', 'key_confidence'],
@@ -1183,7 +1255,7 @@ function initializeParameterSelection() {
         });
 
         // Select essential params by default (without scrolling)
-        const essentialParams = ['spectral_rolloff', 'low_energy', 'mid_energy', 'high_energy', 'danceability', 'beat_strength'];
+        const essentialParams = ['bpm', 'key', 'loudness', 'energy', 'dynamic_range', 'spectral_rolloff', 'low_energy', 'mid_energy', 'high_energy', 'danceability', 'beat_strength'];
         document.querySelectorAll('input[name="wizard-param"]').forEach(cb => {
             if (essentialParams.includes(cb.value)) cb.checked = true;
         });
@@ -1208,7 +1280,7 @@ function initializeParameterSelection() {
         });
 
         // Select essential params by default (without scrolling)
-        const essentialPlaylistParams = ['spectral_rolloff', 'low_energy', 'mid_energy', 'high_energy', 'danceability', 'beat_strength'];
+        const essentialPlaylistParams = ['bpm', 'key', 'loudness', 'energy', 'dynamic_range', 'spectral_rolloff', 'low_energy', 'mid_energy', 'high_energy', 'danceability', 'beat_strength'];
         document.querySelectorAll('input[name="playlist-param"]').forEach(cb => {
             if (essentialPlaylistParams.includes(cb.value)) cb.checked = true;
         });
@@ -1402,7 +1474,7 @@ function renderPresetsInWizard() {
         html += '<h4 class="preset-group-title">👤 Your Presets</h4>';
         html += '<div class="preset-list-content">';
         if (user.length > 0) {
-            user.forEach((preset) => { // Removed index for backend presets
+            user.forEach((preset) => { 
                 html += createPresetHTML(preset, 'user');
             });
         } else {
@@ -1412,7 +1484,10 @@ function renderPresetsInWizard() {
                 html += '<p class="placeholder small">Please login to see and save your cloud presets.</p>';
             }
         }
-        html += '</div></div>'; // Close content and column
+        html += '</div>';
+        // Integrated Footer Button
+        html += '<button id="integrated-import-btn" class="preset-import-footer-btn">IMPORT PRESET FILE</button>';
+        html += '</div>'; // Close column
 
         // RIGHT COLUMN: System Presets
         html += '<div class="presets-column system-column">';
@@ -1428,6 +1503,13 @@ function renderPresetsInWizard() {
         html += '</div>'; // Close split view
 
         listDiv.innerHTML = html;
+
+        // Re-attach import listener to the new integrated button
+        const newImportBtn = document.getElementById('integrated-import-btn');
+        const importInput = document.getElementById('import-preset-wizard-file');
+        if (newImportBtn && importInput) {
+            newImportBtn.addEventListener('click', () => importInput.click());
+        }
 
         // Add click handlers for LOAD
         listDiv.querySelectorAll('.preset-btn.load').forEach(btn => {

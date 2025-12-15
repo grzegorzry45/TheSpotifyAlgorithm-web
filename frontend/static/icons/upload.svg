@@ -1,0 +1,20 @@
+<svg width="64" height="64" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+        <linearGradient id="grad3" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" style="stop-color:#1DB954;stop-opacity:1" />
+            <stop offset="100%" style="stop-color:#1ed760;stop-opacity:1" />
+        </linearGradient>
+    </defs>
+    <!-- Folder Back -->
+    <path d="M8 20 L24 20 L28 24 L56 24 V52 H8 V20Z" stroke="url(#grad3)" stroke-width="2" fill="none" opacity="0.5" />
+    <!-- Folder Front (Animated) -->
+    <path d="M8 52 H56 V30 H8 V52Z" stroke="url(#grad3)" stroke-width="2.5" fill="none">
+            <animate attributeName="d" values="M8 52 H56 V30 H8 V52Z;M8 52 H56 V34 H8 V52Z;M8 52 H56 V30 H8 V52Z" dur="2s" repeatCount="indefinite" />
+    </path>
+    <!-- Arrow Up -->
+    <path d="M32 44 V14 M32 14 L24 22 M32 14 L40 22" stroke="url(#grad3)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <animate attributeName="y1" values="44;40;44" dur="1.5s" repeatCount="indefinite" />
+        <animate attributeName="y2" values="14;10;14" dur="1.5s" repeatCount="indefinite" />
+        <animateTransform attributeName="transform" type="translate" values="0 4; 0 0; 0 4" dur="1.5s" repeatCount="indefinite" />
+    </path>
+</svg>

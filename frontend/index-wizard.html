@@ -222,9 +222,9 @@
 
             <!-- Expandable sections for each option -->
             <div id="playlist-upload-section" class="reference-upload-section" style="display: none;">
-                <h3>📁 Upload Playlist Tracks (2-30 files)</h3>
+                <h3><img src="/static/icons/library.svg" class="icon-svg small" alt=""> Upload Playlist Tracks (2-30 files)</h3>
                 <div class="upload-zone" id="playlist-upload">
-                    <div class="upload-icon">📁</div>
+                    <div class="upload-icon"><img src="/static/icons/library.svg" class="icon-svg large" alt=""></div>
                     <h4>Drag & Drop Playlist Files</h4>
                     <p>or click to browse</p>
                     <p class="file-types">Supported: MP3, WAV, FLAC</p>
@@ -242,10 +242,11 @@
                         <button class="btn btn-secondary btn-small" id="select-all-params-playlist">All Parameters (Thorough)</button>
                     </div>
 
-                    <h4 class="collapsible-header" data-target="playlist-param-groups-container" style="margin-top: 20px; font-size: 14px; color: #b0b0b0;">
-                        <span class="collapse-icon">▶</span> Show all parameters
-                    </h4>
-                    <div id="playlist-param-groups-container" class="collapsible-content collapsed">
+                    <button class="btn-show-params" id="open-params-playlist" style="margin-top: 20px;">
+                        <span class="icon-gear">⚙️</span> Configure Advanced Parameters
+                    </button>
+
+                    <div id="playlist-param-groups-container" style="display: none;">
                         <div class="param-groups" id="playlist-param-groups">
                             <!-- Parameters will be populated by JavaScript -->
                         </div>
@@ -266,25 +267,25 @@
                     <h3>✓ Playlist Profile Created</h3>
                     <div id="playlist-profile-display" class="param-comparison-grid"></div>
                     <div style="margin-top: 25px; display: flex; gap: 15px; flex-wrap: wrap;">
-                        <button id="save-playlist-preset-btn" class="btn btn-primary">💾 Save as Preset</button>
-                        <button id="export-preset-file-btn" class="btn btn-secondary">📥 Export to File</button>
+                        <button id="save-playlist-preset-btn" class="btn btn-primary"><img src="/static/icons/save.svg" class="icon-svg small" alt=""> Save as Preset</button>
+                        <button id="export-preset-file-btn" class="btn btn-secondary"><img src="/static/icons/save.svg" class="icon-svg small" alt=""> Export to File</button>
                     </div>
                 </div>
             </div>
 
             <div id="preset-load-section" class="reference-upload-section" style="display: none;">
-                <h3>📂 Select a Saved Preset</h3>
+                <h3><img src="/static/icons/library.svg" class="icon-svg medium" alt=""> Select a Saved Preset</h3>
                 <div id="preset-list-display" class="preset-list">
                     <p class="placeholder">No presets saved yet</p>
                 </div>
-                <button id="import-preset-wizard-btn" class="btn btn-secondary">📥 Import Preset File</button>
+                <!-- Button moved inside preset list via JS -->
                 <input type="file" id="import-preset-wizard-file" accept=".json" style="display: none;">
             </div>
 
             <div id="single-upload-section" class="reference-upload-section" style="display: none;">
-                <h3>🎼 Upload Reference Track</h3>
+                <h3><img src="/static/icons/library.svg" class="icon-svg small" alt=""> Upload Reference Track</h3>
                 <div class="upload-zone small" id="reference-track-upload">
-                    <div class="upload-icon">🎼</div>
+                    <div class="upload-icon"><img src="/static/icons/library.svg" class="icon-svg large" alt=""></div>
                     <p>Drop reference track here</p>
                     <input type="file" id="reference-track-file" accept=".mp3,.wav,.flac" style="display: none;">
                 </div>
@@ -301,7 +302,7 @@
             </div>
 
             <div class="upload-zone large" id="user-track-upload">
-                <div class="upload-icon">🎵</div>
+                <div class="upload-icon"><img src="/static/icons/library.svg" class="icon-svg large" alt=""></div>
                 <h3>Drag & Drop Your Track Here</h3>
                 <p>or click to browse</p>
                 <p class="file-types">Supported: MP3, WAV, FLAC</p>
@@ -320,10 +321,11 @@
                     <button class="btn btn-secondary btn-small" id="select-all-params">All Parameters (Thorough)</button>
                 </div>
 
-                <h4 class="collapsible-header" data-target="wizard-param-groups-container" style="margin-top: 20px; font-size: 14px; color: #b0b0b0;">
-                    <span class="collapse-icon">▶</span> Show all parameters
-                </h4>
-                <div id="wizard-param-groups-container" class="collapsible-content collapsed">
+                <button class="btn-show-params" id="open-params-user" style="margin-top: 20px;">
+                    <span class="icon-gear">⚙️</span> Configure Advanced Parameters
+                </button>
+
+                <div id="wizard-param-groups-container" style="display: none;">
                     <div class="param-groups" id="wizard-param-groups">
                         <!-- Will be populated by JavaScript -->
                     </div>
@@ -353,12 +355,12 @@
             <div id="results-container" class="results-container">
                 <!-- Results will be populated by JavaScript -->
                 <div class="results-summary">
-                    <h3>📊 Comparison Summary</h3>
+                    <h3><img src="/static/icons/analysis.svg" class="icon-svg medium" alt=""> Comparison Summary</h3>
                     <div id="comparison-summary"></div>
                 </div>
 
                 <div class="recommendations-section">
-                    <h3>💡 AI Recommendations (NOT WORKING YET)</h3>
+                    <h3><img src="/static/icons/recommendations.svg" class="icon-svg medium" alt=""> AI Recommendations (NOT WORKING YET)</h3>
                     <p class="recommendations-intro">Based on the analysis, here's what you can improve:</p>
                     <div id="ai-recommendations"></div>
                 </div>
@@ -399,7 +401,7 @@
     <!-- Login Modal -->
     <div id="login-modal" class="modal" style="display: none;">
         <div class="modal-content">
-            <h3>🔑 Login</h3>
+            <h3><img src="/static/icons/auth.svg" class="icon-svg small" alt=""> Login</h3>
             <div class="auth-form">
                 <input type="email" id="login-email" placeholder="Email" required>
                 <input type="password" id="login-password" placeholder="Password" required>
@@ -416,7 +418,7 @@
     <!-- Register Modal -->
     <div id="register-modal" class="modal" style="display: none;">
         <div class="modal-content">
-            <h3>📝 Register</h3>
+            <h3><img src="/static/icons/auth.svg" class="icon-svg small" alt=""> Register</h3>
             <div class="auth-form">
                 <input type="email" id="register-email" placeholder="Email" required>
                 <input type="password" id="register-password" placeholder="Password" required>
@@ -433,12 +435,30 @@
     <!-- Save Preset Modal -->
     <div id="save-preset-modal" class="modal" style="display: none;">
         <div class="modal-content">
-            <h3>💾 Save Playlist as Preset</h3>
+            <h3><img src="/static/icons/save.svg" class="icon-svg medium" alt=""> Save Playlist as Preset</h3>
             <p>Enter a name for this playlist profile:</p>
             <input type="text" id="preset-name-input-wizard" placeholder="e.g., Top 40 Hits 2024" maxlength="50">
             <div class="modal-buttons">
                 <button id="preset-save-confirm-wizard" class="btn btn-primary">SAVE</button>
                 <button id="preset-save-cancel-wizard" class="btn btn-secondary">CANCEL</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Advanced Parameters Modal -->
+    <div id="params-modal" class="modal" style="display: none;">
+        <div class="modal-content large">
+            <div class="modal-header">
+                <h3><img src="/static/icons/analysis.svg" class="icon-svg medium" alt=""> Advanced Parameters</h3>
+                <button id="close-params-modal" style="background:none;border:none;color:#888;font-size:24px;cursor:pointer;">✕</button>
+            </div>
+            <div class="modal-body-scroll">
+                <div id="modal-params-container" class="params-grid-container">
+                    <!-- Parameters will be moved here dynamically -->
+                </div>
+            </div>
+            <div class="modal-buttons">
+                <button id="confirm-params-btn" class="btn btn-primary">CONFIRM SELECTION</button>
             </div>
         </div>
     </div>
