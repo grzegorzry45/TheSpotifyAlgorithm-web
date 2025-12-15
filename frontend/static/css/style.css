@@ -109,7 +109,7 @@ body {
         rgba(255, 255, 255, 0.8) 50%,
         transparent 100%
     );
-    animation: shine 3s infinite;
+    animation: shine 12s infinite;
     z-index: 1;
     mix-blend-mode: overlay;
 }
@@ -118,7 +118,10 @@ body {
     0% {
         left: -100%;
     }
-    50%, 100% {
+    25% {
+        left: 200%;
+    }
+    100% {
         left: 200%;
     }
 }
@@ -130,28 +133,14 @@ body {
     background: linear-gradient(
         135deg,
         #ffffff 0%,
-        #1DB954 25%,
-        #1ed760 50%,
-        #1DB954 75%,
+        #e0e0e0 50%,
         #ffffff 100%
     );
-    background-size: 200% auto;
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
-    animation: gradient-shift 4s ease-in-out infinite;
-    filter: drop-shadow(0 0 20px rgba(29, 185, 84, 0.3))
-            drop-shadow(0 0 40px rgba(29, 185, 84, 0.2));
+    filter: drop-shadow(0 0 15px rgba(255, 255, 255, 0.2));
     text-transform: uppercase;
-}
-
-@keyframes gradient-shift {
-    0%, 100% {
-        background-position: 0% center;
-    }
-    50% {
-        background-position: 200% center;
-    }
 }
 
 .status {
