@@ -312,7 +312,7 @@ function displayTrackName(containerId, filename, onRemove) {
     trackElement.className = 'track-name';
     trackElement.innerHTML = `
         <span>${filename}</span>
-        <button class="remove-track">├Ś</button>
+        <button class="remove-track">✕</button>
     `;
 
     trackElement.querySelector('.remove-track').addEventListener('click', onRemove);
@@ -451,7 +451,7 @@ function handlePlaylistFiles(files) {
         item.className = 'file-item';
         item.innerHTML = `
             <span>${file.name}</span>
-            <button class="remove-file" data-index="${index}">├Ś</button>
+            <button class="remove-file" data-index="${index}">✕</button>
         `;
         fileList.appendChild(item);
 
@@ -722,7 +722,7 @@ function handleUserTrackFiles(files) {
         item.className = 'file-item';
         item.innerHTML = `
             <span>${file.name}</span>
-            <button class="remove-file" data-index="${index}">├Ś</button>
+            <button class="remove-file" data-index="${index}">✕</button>
         `;
         fileList.appendChild(item);
 
@@ -1792,17 +1792,17 @@ function displayPresetsList() {
         item.innerHTML = `
             <div class="preset-info">
                 <div class="preset-name">${preset.name}</div>
-                <div class="preset-meta">${preset.tracksCount} tracks ÔÇó ${paramCount} parameters ÔÇó ${date}</div>
+                <div class="preset-meta">${preset.tracksCount} tracks • ${paramCount} parameters • ${date}</div>
             </div>
                         <div class="preset-actions">
 
-                            <button class="preset-btn load" onclick="loadPreset('${preset.id}')">­čôé LOAD</button>
+                            <button class="preset-btn load" onclick="loadPreset('${preset.id}')">📂 LOAD</button>
 
                             <button class="preset-btn export" onclick="PresetManager.exportPreset('${preset.id}')">📤 EXPORT</button>
 
-                            <button class="preset-btn rename" onclick="showRenameModal('${preset.id}')">ÔťĆ´ŞĆ RENAME</button>
+                            <button class="preset-btn rename" onclick="showRenameModal('${preset.id}')">✏️ RENAME</button>
 
-                            <button class="preset-btn delete" onclick="deletePreset('${preset.id}')">­čŚĹ´ŞĆ DELETE</button>
+                            <button class="preset-btn delete" onclick="deletePreset('${preset.id}')">🗑️ DELETE</button>
 
                         </div>
         `;
@@ -1833,10 +1833,10 @@ function displayComparePresetsList() {
         item.innerHTML = `
             <div class="preset-info">
                 <div class="preset-name">${preset.name}</div>
-                <div class="preset-meta">${preset.tracksCount} tracks ÔÇó ${paramCount} parameters ÔÇó ${date}</div>
+                <div class="preset-meta">${preset.tracksCount} tracks • ${paramCount} parameters • ${date}</div>
             </div>
             <div class="preset-actions">
-                <button class="preset-btn load" onclick="loadPresetForCompare('${preset.id}')">­čôé LOAD</button>
+                <button class="preset-btn load" onclick="loadPresetForCompare('${preset.id}')">📂 LOAD</button>
             </div>
         `;
 
