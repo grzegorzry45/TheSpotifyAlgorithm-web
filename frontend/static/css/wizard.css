@@ -470,16 +470,72 @@
     .diff-cell::before { content: 'Difference: '; color: var(--text-secondary); }
 }
 
-/* --- Progress Modal (Matches style.css) --- */
-/* Reuse existing modal styles but ensure specificity */
+/* --- Progress Modal (Critical Fix) --- */
+
+.progress-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.8);
+    backdrop-filter: blur(8px);
+    z-index: 9999;
+    display: none; /* JS toggles to flex */
+    align-items: center;
+    justify-content: center;
+}
+
+/* When JS sets display: flex */
+.progress-modal-overlay[style*="flex"] {
+    animation: fadeIn 0.3s ease-out;
+}
+
 .progress-modal-content {
     background: var(--bg-surface);
     border: 1px solid rgba(255, 255, 255, 0.1);
     box-shadow: var(--shadow-card);
     border-radius: var(--radius-lg);
+    padding: 40px;
+    min-width: 320px;
+    max-width: 500px;
+    text-align: center;
 }
 
 .progress-spinner {
-    border-color: rgba(29, 185, 84, 0.2);
-    border-top-color: var(--primary);
+    width: 48px;
+    height: 48px;
+    border: 3px solid rgba(29, 185, 84, 0.1);
+    border-top: 3px solid var(--primary);
+    border-radius: 50%;
+    margin: 0 auto 24px;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.progress-bar-modal {
+    background: var(--bg-elevated);
+    height: 6px;
+    border-radius: var(--radius-full);
+    margin: 24px 0 16px;
+    overflow: hidden;
+    position: relative;
+}
+
+.progress-fill-modal {
+    background: var(--primary);
+    height: 100%;
+    width: 0%;
+    transition: width 0.3s ease;
+    box-shadow: 0 0 12px var(--accent-glow);
+}
+
+.progress-message-modal {
+    color: var(--text-secondary);
+    font-size: 14px;
+    font-weight: 500;
 }
