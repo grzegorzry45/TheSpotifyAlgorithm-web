@@ -1112,21 +1112,22 @@ body {
 /* --- Advanced Params Modal Styling --- */
 
 .modal-content.large {
-    max-width: 1600px; /* Maximize horizontal space for parameters */
-    width: 95%;
+    max-width: 95vw; /* Use viewport width instead of fixed px */
+    width: 95vw;
     max-height: 85vh;
     display: flex;
     flex-direction: column;
     border: 1px solid rgba(29, 185, 84, 0.2);
     box-shadow: 0 20px 80px rgba(0,0,0,0.8), 0 0 30px rgba(29, 185, 84, 0.1);
+    padding: 30px;
 }
 
 .modal-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 20px;
-    padding-bottom: 15px;
+    margin-bottom: 16px;
+    padding-bottom: 12px;
     border-bottom: 1px solid rgba(255,255,255,0.1);
 }
 
@@ -1140,9 +1141,10 @@ body {
 
 .modal-body-scroll {
     overflow-y: auto;
-    padding-right: 10px;
-    margin-bottom: 20px;
+    padding-right: 0;
+    margin-bottom: 16px;
     flex: 1;
+    width: 100%;
 }
 
 /* Custom Scrollbar */
@@ -1152,16 +1154,16 @@ body {
 .modal-body-scroll::-webkit-scrollbar-thumb:hover { background: var(--primary); }
 
 /* Force Grid Layout inside Modal */
-.modal-body-scroll .param-groups, 
+.modal-body-scroll .param-groups,
 .modal-body-scroll .params-grid-container {
     display: grid !important;
     grid-template-columns: repeat(6, 1fr) !important;
-    gap: 16px;
-    margin-top: 0;
+    gap: 12px;
+    margin: 0;
+    padding: 0;
     width: 100% !important;
     max-width: none !important;
     box-sizing: border-box !important;
-    padding: 0 5px; /* Minimal side padding */
 }
 
 /* Responsive Grid for Modal */
@@ -1198,6 +1200,17 @@ body {
     background: rgba(255, 255, 255, 0.03);
     border: 1px solid rgba(255, 255, 255, 0.05);
     height: 100%;
+    padding: 14px;
+}
+
+.modal-body-scroll .param-group h4 {
+    margin-bottom: 10px;
+    font-size: 13px;
+}
+
+.modal-body-scroll .param-group label {
+    padding: 5px 0;
+    font-size: 12px;
 }
 
 .modal-body-scroll .param-group:hover {
