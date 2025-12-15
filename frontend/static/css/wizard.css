@@ -183,7 +183,29 @@
 .card-icon {
     font-size: 48px;
     margin-bottom: 24px;
-    filter: drop-shadow(0 4px 8px rgba(0,0,0,0.3));
+    filter: drop-shadow(0 4px 12px rgba(29, 185, 84, 0.2));
+    transition: all 0.4s var(--ease-out);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.card-icon svg {
+    transition: all 0.4s var(--ease-out);
+}
+
+.reference-card:hover .card-icon {
+    filter: drop-shadow(0 8px 24px rgba(29, 185, 84, 0.4));
+    transform: translateY(-4px) scale(1.08);
+}
+
+.reference-card:hover .card-icon svg {
+    filter: brightness(1.2);
+}
+
+.reference-card.selected .card-icon {
+    filter: drop-shadow(0 8px 24px rgba(29, 185, 84, 0.6));
+    transform: scale(1.05);
 }
 
 .reference-card h3 {
