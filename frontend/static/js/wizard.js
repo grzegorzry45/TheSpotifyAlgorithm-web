@@ -1038,60 +1038,80 @@ function initializeResults() {
 // ===== EXPORT FUNCTIONS =====
 
 function exportToCSV() {
-    // Check if we have results to export (results are displayed in the DOM or stored globally?)
-    // We don't have a global 'currentResults' variable, but we can extract from DOM or save it when displaying.
-    // Better to use the data directly if possible. Let's assume we can grab it from the DOM for simplicity and "what you see is what you get".
-    
+    if (!currentAnalysisResults || !currentAnalysisResults.user_track) {
+        showMessage('No analysis data available to export.', 'error');
+        return;
+    }
+
     const rows = [];
     
-    // Header
-    rows.push(['Parameter', 'Reference Value', 'Your Track', 'Difference', 'Status']);
+    // 1. Comparison Data
+    rows.push(['COMPARISON SUMMARY']);
+    rows.push(['Parameter', 'Reference Value', 'Your Track', 'Difference']);
     
-    // Get all comparison rows
-    const domRows = document.querySelectorAll('.comparison-row');
-    domRows.forEach(row => {
-        const param = row.querySelector('.param-name-cell')?.textContent || '';
-        const ref = row.querySelector('.reference-cell')?.textContent || '';
-        const user = row.querySelector('.user-cell')?.textContent || '';
-        const diff = row.querySelector('.diff-cell')?.textContent || '';
-        // Extract status class from diff-cell
-        const diffClass = row.querySelector('.diff-cell')?.className || '';
-        let status = 'Neutral';
-        if (diffClass.includes('diff-higher')) status = 'Higher';
-        if (diffClass.includes('diff-lower')) status = 'Lower';
-        
-        rows.push([
-            `"${param}"`, // Quote strings to handle commas
-            `"${ref}"`,
-            `"${user}"`,
-            `"${diff}"`,
-            `"${status}"`
-        ]);
+    const userTrack = currentAnalysisResults.user_track;
+    const refData = currentAnalysisResults.reference_track || currentAnalysisResults.playlist_profile || {};
+    
+    Object.entries(userTrack).forEach(([key, userValue]) => {
+        if (key !== 'filename' && typeof userValue !== 'object') {
+            let refValue = refData[key];
+            if (refValue && typeof refValue === 'object' && refValue.hasOwnProperty('mean')) {
+                refValue = refValue.mean;
+            }
+            
+            const hasDiff = refValue !== undefined && refValue !== null;
+            let diffDisplay = '-';
+            
+            if (hasDiff && typeof userValue === 'number' && typeof refValue === 'number') {
+                const diff = userValue - refValue;
+                const diffPercent = refValue !== 0 ? ((diff / refValue) * 100).toFixed(1) : '0';
+                diffDisplay = `${diff > 0 ? '+' : ''}${diff.toFixed(2)} (${diffPercent}%)`;
+            }
+            
+            rows.push([
+                `"${formatParamName(key)}"`,
+                `"${hasDiff ? (typeof refValue === 'number' ? refValue.toFixed(2) : refValue) : '-'}"`,
+                `"${typeof userValue === 'number' ? userValue.toFixed(2) : userValue}"`,
+                `"${diffDisplay}"`
+            ]);
+        }
     });
     
-    // Recommendations
+    // 2. Recommendations
     rows.push([]); // Empty row
     rows.push(['AI RECOMMENDATIONS']);
-    rows.push(['Category', 'Suggestion']);
     
-    const recCategories = document.querySelectorAll('.recommendation-category');
-    recCategories.forEach(cat => {
-        const catName = cat.querySelector('h4')?.textContent || 'General';
-        const items = cat.querySelectorAll('.recommendation-item');
-        items.forEach(item => {
-            rows.push([`"${catName}"`, `"${item.textContent.replace('💡 ', '')}"`]);
-        });
-    });
+    if (currentAnalysisResults.recommendations) {
+        // Handle array format
+        if (Array.isArray(currentAnalysisResults.recommendations)) {
+             rows.push(['Category', 'Suggestion']);
+             currentAnalysisResults.recommendations.forEach(rec => {
+                 let cat = rec.category || rec.parameter || 'General';
+                 let msg = rec.suggestion || rec.message || '';
+                 rows.push([`"${cat}"`, `"${msg.replace(/"/g, '""')}"`]);
+             });
+        } 
+        // Handle object format
+        else {
+            rows.push(['Category', 'Suggestion']);
+            Object.entries(currentAnalysisResults.recommendations).forEach(([category, list]) => {
+                if (Array.isArray(list)) {
+                    list.forEach(item => {
+                        rows.push([`"${category.toUpperCase()}"`, `"${item.replace(/"/g, '""')}"`]);
+                    });
+                }
+            });
+        }
+    }
 
     // Create CSV content
     const csvContent = "data:text/csv;charset=utf-8," + 
         rows.map(e => e.join(",")).join("\n");
         
-    // Download
     const encodedUri = encodeURI(csvContent);
     const link = document.createElement("a");
     link.setAttribute("href", encodedUri);
-    const filename = userTrackFile ? `analysis_${userTrackFile.name}.csv` : "analysis_results.csv";
+    const filename = userTrack.filename ? `analysis_${userTrack.filename}.csv` : "analysis_results.csv";
     link.setAttribute("download", filename);
     document.body.appendChild(link);
     link.click();
@@ -1099,34 +1119,75 @@ function exportToCSV() {
 }
 
 function exportToPDF() {
-    const element = document.getElementById('results-container');
-    if (!element) return;
+    const originalElement = document.getElementById('results-container');
+    if (!originalElement) return;
 
-    // Options for html2pdf
+    // 1. Clone the element to isolate it from current page styling/scroll
+    const clone = originalElement.cloneNode(true);
+    
+    // 2. Create a temporary container for the clone
+    const pdfContainer = document.createElement('div');
+    pdfContainer.style.position = 'absolute';
+    pdfContainer.style.top = '0';
+    pdfContainer.style.left = '0';
+    pdfContainer.style.width = '800px'; // Fixed A4-like width
+    pdfContainer.style.zIndex = '-9999'; // Hide behind everything
+    pdfContainer.style.background = 'white';
+    pdfContainer.style.color = 'black';
+    pdfContainer.style.padding = '40px';
+    
+    // Apply specific PDF styles to the clone via class
+    clone.classList.add('pdf-export-mode');
+    
+    // Force clean styles on the clone structure
+    const allElements = clone.getElementsByTagName('*');
+    for (let el of allElements) {
+        el.style.color = 'black';
+        if(el.classList.contains('comparison-table')) {
+            el.style.boxShadow = 'none';
+            el.style.border = '1px solid #ccc';
+        }
+        if(el.classList.contains('comparison-header')) {
+            el.style.background = '#f0f0f0';
+            el.style.color = 'black';
+        }
+        if(el.classList.contains('comparison-row')) {
+            el.style.borderBottom = '1px solid #eee';
+        }
+        // Fix reference/user colors in cells
+        if(el.classList.contains('reference-cell')) el.style.color = '#666';
+        if(el.classList.contains('user-cell')) el.style.color = 'black';
+    }
+
+    pdfContainer.appendChild(clone);
+    document.body.appendChild(pdfContainer);
+
+    // 3. Generate PDF from the isolated container
     const opt = {
-        margin:       [10, 10, 10, 10], // top, left, bottom, right
-        filename:     userTrackFile ? `analysis_report_${userTrackFile.name}.pdf` : 'analysis_report.pdf',
+        margin:       [10, 10, 10, 10],
+        filename:     currentAnalysisResults?.user_track?.filename ? `report_${currentAnalysisResults.user_track.filename}.pdf` : 'analysis_report.pdf',
         image:        { type: 'jpeg', quality: 0.98 },
-        html2canvas:  { scale: 2, useCORS: true, logging: false },
+        html2canvas:  { scale: 2, useCORS: true, logging: false, windowWidth: 800 },
         jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
     };
 
-    // Add a temporary class for PDF styling (white background, black text)
-    element.classList.add('pdf-export-mode');
-    
-    // Generate PDF
-    html2pdf().set(opt).from(element).save().then(() => {
-        // Remove class after saving
-        element.classList.remove('pdf-export-mode');
+    showMessage('Generating PDF...', 'success');
+
+    html2pdf().set(opt).from(clone).save().then(() => {
+        // Cleanup
+        document.body.removeChild(pdfContainer);
         showMessage('PDF Report downloaded!', 'success');
     }).catch(err => {
         console.error('PDF Generation Error:', err);
-        element.classList.remove('pdf-export-mode');
-        showMessage('Failed to generate PDF. Please try again.', 'error');
+        if(document.body.contains(pdfContainer)) {
+            document.body.removeChild(pdfContainer);
+        }
+        showMessage('Failed to generate PDF.', 'error');
     });
 }
 
 function displayResults(results) {
+    currentAnalysisResults = results; // Save for export
     const summaryDiv = document.getElementById('comparison-summary');
     const recommendationsDiv = document.getElementById('ai-recommendations');
 
@@ -1203,16 +1264,42 @@ function displayResults(results) {
     // Display AI recommendations
     if (results.recommendations) {
         let recsHTML = '';
+        let groupedRecs = {};
 
-        Object.entries(results.recommendations).forEach(([category, recommendations]) => {
-            if (recommendations && recommendations.length > 0) {
+        // Handle array format from backend
+        if (Array.isArray(results.recommendations)) {
+            results.recommendations.forEach(rec => {
+                // Determine category
+                let category = 'Analysis';
+                if (rec.category) category = rec.category;
+                else if (rec.parameter) category = rec.parameter;
+                
+                // Determine message
+                const message = rec.suggestion || rec.message;
+                
+                if (message) {
+                    if (!groupedRecs[category]) groupedRecs[category] = [];
+                    groupedRecs[category].push(message);
+                }
+            });
+        } 
+        // Handle potential object format (legacy)
+        else if (typeof results.recommendations === 'object') {
+            groupedRecs = results.recommendations;
+        }
+
+        Object.entries(groupedRecs).forEach(([category, items]) => {
+            // Handle if items is string (single message) or array
+            const itemList = Array.isArray(items) ? items : [items];
+            
+            if (itemList.length > 0) {
                 recsHTML += `
                     <div class="recommendation-category">
                         <h4>${category.toUpperCase()}</h4>
                         <ul class="recommendation-list">
                 `;
 
-                recommendations.forEach(rec => {
+                itemList.forEach(rec => {
                     recsHTML += `<li class="recommendation-item">💡 ${rec}</li>`;
                 });
 
