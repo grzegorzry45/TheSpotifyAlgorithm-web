@@ -1038,80 +1038,81 @@ function initializeResults() {
 // ===== EXPORT FUNCTIONS =====
 
 function exportToCSV() {
-    if (!currentAnalysisResults || !currentAnalysisResults.user_track) {
-        showMessage('No analysis data available to export.', 'error');
-        return;
-    }
-
     const rows = [];
     
-    // 1. Comparison Data
+    // 1. COMPARISON DATA (Scraped from DOM to ensure 1:1 match with UI)
     rows.push(['COMPARISON SUMMARY']);
     rows.push(['Parameter', 'Reference Value', 'Your Track', 'Difference']);
     
-    const userTrack = currentAnalysisResults.user_track;
-    const refData = currentAnalysisResults.reference_track || currentAnalysisResults.playlist_profile || {};
+    // Find the visible table container
+    const tableContainer = document.querySelector('#comparison-summary .comparison-table');
     
-    Object.entries(userTrack).forEach(([key, userValue]) => {
-        if (key !== 'filename' && typeof userValue !== 'object') {
-            let refValue = refData[key];
-            if (refValue && typeof refValue === 'object' && refValue.hasOwnProperty('mean')) {
-                refValue = refValue.mean;
-            }
-            
-            const hasDiff = refValue !== undefined && refValue !== null;
-            let diffDisplay = '-';
-            
-            if (hasDiff && typeof userValue === 'number' && typeof refValue === 'number') {
-                const diff = userValue - refValue;
-                const diffPercent = refValue !== 0 ? ((diff / refValue) * 100).toFixed(1) : '0';
-                diffDisplay = `${diff > 0 ? '+' : ''}${diff.toFixed(2)} (${diffPercent}%)`;
-            }
-            
-            rows.push([
-                `"${formatParamName(key)}"`,
-                `"${hasDiff ? (typeof refValue === 'number' ? refValue.toFixed(2) : refValue) : '-'}"`,
-                `"${typeof userValue === 'number' ? userValue.toFixed(2) : userValue}"`,
-                `"${diffDisplay}"`
-            ]);
+    if (tableContainer) {
+        const domRows = tableContainer.querySelectorAll('.comparison-row');
+        if (domRows.length === 0) {
+            console.warn("No comparison rows found in DOM");
         }
-    });
+        
+        domRows.forEach(row => {
+            // Helper to safe-get text
+            const txt = (selector) => {
+                const el = row.querySelector(selector);
+                return el ? el.textContent.trim() : '';
+            };
+
+            const param = txt('.param-name-cell');
+            const ref = txt('.reference-cell');
+            const user = txt('.user-cell');
+            const diff = txt('.diff-cell');
+            
+            if (param) {
+                rows.push([`"${param}"`, `"${ref}"`, `"${user}"`, `"${diff}"`]);
+            }
+        });
+    } else {
+        rows.push(['No comparison data visible']);
+    }
     
-    // 2. Recommendations
-    rows.push([]); // Empty row
+    // 2. RECOMMENDATIONS (Scraped from DOM)
+    rows.push([]); 
     rows.push(['AI RECOMMENDATIONS']);
     
-    if (currentAnalysisResults.recommendations) {
-        // Handle array format
-        if (Array.isArray(currentAnalysisResults.recommendations)) {
-             rows.push(['Category', 'Suggestion']);
-             currentAnalysisResults.recommendations.forEach(rec => {
-                 let cat = rec.category || rec.parameter || 'General';
-                 let msg = rec.suggestion || rec.message || '';
-                 rows.push([`"${cat}"`, `"${msg.replace(/"/g, '""')}"`]);
-             });
-        } 
-        // Handle object format
-        else {
+    const recContainer = document.getElementById('ai-recommendations');
+    if (recContainer) {
+        const categories = recContainer.querySelectorAll('.recommendation-category');
+        if (categories.length > 0) {
             rows.push(['Category', 'Suggestion']);
-            Object.entries(currentAnalysisResults.recommendations).forEach(([category, list]) => {
-                if (Array.isArray(list)) {
-                    list.forEach(item => {
-                        rows.push([`"${category.toUpperCase()}"`, `"${item.replace(/"/g, '""')}"`]);
-                    });
-                }
+            categories.forEach(cat => {
+                const catName = cat.querySelector('h4')?.textContent || 'General';
+                const items = cat.querySelectorAll('.recommendation-item');
+                items.forEach(item => {
+                    // Remove the lightbulb icon if present
+                    const cleanText = item.textContent.replace('💡', '').trim();
+                    rows.push([`"${catName.toUpperCase()}"`, `"${cleanText.replace(/"/g, '""')}"`]);
+                });
             });
+        } else {
+             // Fallback if structure is flat or empty
+             const noRecs = recContainer.querySelector('.no-recommendations');
+             if (noRecs) {
+                 rows.push(['Result', noRecs.textContent]);
+             }
         }
     }
 
     // Create CSV content
-    const csvContent = "data:text/csv;charset=utf-8," + 
-        rows.map(e => e.join(",")).join("\n");
+    const csvContent = "data:text/csv;charset=utf-8," + rows.map(e => e.join(",")).join("\n");
         
     const encodedUri = encodeURI(csvContent);
     const link = document.createElement("a");
     link.setAttribute("href", encodedUri);
-    const filename = userTrack.filename ? `analysis_${userTrack.filename}.csv` : "analysis_results.csv";
+    // Try to get filename from the UI or fallback
+    let filename = "analysis_results.csv";
+    const filenameDisplay = document.querySelector('#analyzed-filename-display span');
+    if (filenameDisplay && filenameDisplay.textContent) {
+        filename = `analysis_${filenameDisplay.textContent}.csv`;
+    }
+    
     link.setAttribute("download", filename);
     document.body.appendChild(link);
     link.click();
@@ -1120,66 +1121,85 @@ function exportToCSV() {
 
 function exportToPDF() {
     const originalElement = document.getElementById('results-container');
-    if (!originalElement) return;
+    if (!originalElement) {
+        showMessage('No results to export.', 'error');
+        return;
+    }
 
-    // 1. Clone the element to isolate it from current page styling/scroll
+    showMessage('Preparing PDF...', 'info');
+
+    // 1. Clone the element
     const clone = originalElement.cloneNode(true);
     
-    // 2. Create a temporary container for the clone
+    // 2. Prepare container specifically for PDF generation
     const pdfContainer = document.createElement('div');
+    // Important: Use a fixed width container that fits A4, but allow infinite height
+    pdfContainer.style.width = '800px'; 
     pdfContainer.style.position = 'absolute';
+    pdfContainer.style.left = '-9999px'; // Off-screen but renderable
     pdfContainer.style.top = '0';
-    pdfContainer.style.left = '0';
-    pdfContainer.style.width = '800px'; // Fixed A4-like width
-    pdfContainer.style.zIndex = '-9999'; // Hide behind everything
-    pdfContainer.style.background = 'white';
-    pdfContainer.style.color = 'black';
+    pdfContainer.style.zIndex = '10000';
+    pdfContainer.style.backgroundColor = '#ffffff';
+    pdfContainer.style.color = '#000000';
     pdfContainer.style.padding = '40px';
+    pdfContainer.style.fontFamily = 'Arial, sans-serif'; // Safe font for PDF
     
-    // Apply specific PDF styles to the clone via class
+    // 3. AGGRESSIVE STYLE RESET on the clone
     clone.classList.add('pdf-export-mode');
     
-    // Force clean styles on the clone structure
-    const allElements = clone.getElementsByTagName('*');
-    for (let el of allElements) {
-        el.style.color = 'black';
-        if(el.classList.contains('comparison-table')) {
-            el.style.boxShadow = 'none';
-            el.style.border = '1px solid #ccc';
+    // Force reset all scrollable/constrained containers inside the clone
+    const allElements = clone.querySelectorAll('*');
+    allElements.forEach(el => {
+        el.style.maxHeight = 'none';
+        el.style.overflow = 'visible';
+        el.style.height = 'auto';
+        el.style.color = '#000000'; // Force black text
+        el.style.background = 'transparent'; // Remove background colors
+        el.style.boxShadow = 'none';
+        
+        // Specific fixes for table
+        if (el.classList.contains('comparison-row')) {
+            el.style.borderBottom = '1px solid #ccc';
+            el.style.pageBreakInside = 'avoid'; // Try to prevent splitting rows
         }
-        if(el.classList.contains('comparison-header')) {
-            el.style.background = '#f0f0f0';
-            el.style.color = 'black';
-        }
-        if(el.classList.contains('comparison-row')) {
-            el.style.borderBottom = '1px solid #eee';
-        }
-        // Fix reference/user colors in cells
-        if(el.classList.contains('reference-cell')) el.style.color = '#666';
-        if(el.classList.contains('user-cell')) el.style.color = 'black';
+    });
+
+    // Make sure header is visible
+    const header = clone.querySelector('.results-summary');
+    if (header) {
+        header.style.backgroundColor = '#fff';
+        header.style.border = 'none';
     }
 
     pdfContainer.appendChild(clone);
     document.body.appendChild(pdfContainer);
 
-    // 3. Generate PDF from the isolated container
+    // 4. Generate PDF
     const opt = {
-        margin:       [10, 10, 10, 10],
-        filename:     currentAnalysisResults?.user_track?.filename ? `report_${currentAnalysisResults.user_track.filename}.pdf` : 'analysis_report.pdf',
+        margin:       [10, 10, 10, 10], // mm
+        filename:     'analysis_report.pdf',
         image:        { type: 'jpeg', quality: 0.98 },
-        html2canvas:  { scale: 2, useCORS: true, logging: false, windowWidth: 800 },
+        html2canvas:  { 
+            scale: 2, 
+            useCORS: true, 
+            scrollY: 0,
+            windowWidth: 1000 // Render as if window is wide enough
+        },
         jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
     };
+    
+    // Update filename if available
+    const filenameDisplay = document.querySelector('#analyzed-filename-display span');
+    if (filenameDisplay && filenameDisplay.textContent) {
+        opt.filename = `report_${filenameDisplay.textContent}.pdf`;
+    }
 
-    showMessage('Generating PDF...', 'success');
-
-    html2pdf().set(opt).from(clone).save().then(() => {
-        // Cleanup
+    html2pdf().set(opt).from(pdfContainer).save().then(() => {
         document.body.removeChild(pdfContainer);
         showMessage('PDF Report downloaded!', 'success');
     }).catch(err => {
-        console.error('PDF Generation Error:', err);
-        if(document.body.contains(pdfContainer)) {
+        console.error('PDF Error:', err);
+        if (document.body.contains(pdfContainer)) {
             document.body.removeChild(pdfContainer);
         }
         showMessage('Failed to generate PDF.', 'error');
