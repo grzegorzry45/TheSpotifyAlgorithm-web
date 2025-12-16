@@ -370,7 +370,10 @@
 
             <div class="wizard-navigation">
                 <button class="btn btn-secondary" id="start-over-btn">🔄 Start Over</button>
-                <button class="btn btn-primary" id="export-report-btn">📄 Export Report </button>
+                <div style="display: flex; gap: 10px;">
+                    <button class="btn btn-secondary" id="export-csv-btn">📊 Export CSV</button>
+                    <button class="btn btn-primary" id="export-pdf-btn">📄 Export PDF</button>
+                </div>
             </div>
         </div>
 
@@ -487,6 +490,8 @@
         </div>
     </div>
 
+    <!-- html2pdf for PDF export -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <script src="/static/js/wizard.js?v=2.1"></script>
 </body>
 </html>

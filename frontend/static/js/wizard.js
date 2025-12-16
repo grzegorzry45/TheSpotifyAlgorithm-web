@@ -1030,7 +1030,100 @@ async function compareTrack() {
 
 function initializeResults() {
     document.getElementById('start-over-btn')?.addEventListener('click', startOver);
-    document.getElementById('export-report-btn')?.addEventListener('click', exportReport);
+    // document.getElementById('export-report-btn')?.addEventListener('click', exportReport); // Old HTML report
+    document.getElementById('export-csv-btn')?.addEventListener('click', exportToCSV);
+    document.getElementById('export-pdf-btn')?.addEventListener('click', exportToPDF);
+}
+
+// ===== EXPORT FUNCTIONS =====
+
+function exportToCSV() {
+    // Check if we have results to export (results are displayed in the DOM or stored globally?)
+    // We don't have a global 'currentResults' variable, but we can extract from DOM or save it when displaying.
+    // Better to use the data directly if possible. Let's assume we can grab it from the DOM for simplicity and "what you see is what you get".
+    
+    const rows = [];
+    
+    // Header
+    rows.push(['Parameter', 'Reference Value', 'Your Track', 'Difference', 'Status']);
+    
+    // Get all comparison rows
+    const domRows = document.querySelectorAll('.comparison-row');
+    domRows.forEach(row => {
+        const param = row.querySelector('.param-name-cell')?.textContent || '';
+        const ref = row.querySelector('.reference-cell')?.textContent || '';
+        const user = row.querySelector('.user-cell')?.textContent || '';
+        const diff = row.querySelector('.diff-cell')?.textContent || '';
+        // Extract status class from diff-cell
+        const diffClass = row.querySelector('.diff-cell')?.className || '';
+        let status = 'Neutral';
+        if (diffClass.includes('diff-higher')) status = 'Higher';
+        if (diffClass.includes('diff-lower')) status = 'Lower';
+        
+        rows.push([
+            `"${param}"`, // Quote strings to handle commas
+            `"${ref}"`,
+            `"${user}"`,
+            `"${diff}"`,
+            `"${status}"`
+        ]);
+    });
+    
+    // Recommendations
+    rows.push([]); // Empty row
+    rows.push(['AI RECOMMENDATIONS']);
+    rows.push(['Category', 'Suggestion']);
+    
+    const recCategories = document.querySelectorAll('.recommendation-category');
+    recCategories.forEach(cat => {
+        const catName = cat.querySelector('h4')?.textContent || 'General';
+        const items = cat.querySelectorAll('.recommendation-item');
+        items.forEach(item => {
+            rows.push([`"${catName}"`, `"${item.textContent.replace('💡 ', '')}"`]);
+        });
+    });
+
+    // Create CSV content
+    const csvContent = "data:text/csv;charset=utf-8," + 
+        rows.map(e => e.join(",")).join("\n");
+        
+    // Download
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement("a");
+    link.setAttribute("href", encodedUri);
+    const filename = userTrackFile ? `analysis_${userTrackFile.name}.csv` : "analysis_results.csv";
+    link.setAttribute("download", filename);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+}
+
+function exportToPDF() {
+    const element = document.getElementById('results-container');
+    if (!element) return;
+
+    // Options for html2pdf
+    const opt = {
+        margin:       [10, 10, 10, 10], // top, left, bottom, right
+        filename:     userTrackFile ? `analysis_report_${userTrackFile.name}.pdf` : 'analysis_report.pdf',
+        image:        { type: 'jpeg', quality: 0.98 },
+        html2canvas:  { scale: 2, useCORS: true, logging: false },
+        jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
+    };
+
+    // Add a temporary class for PDF styling (white background, black text)
+    element.classList.add('pdf-export-mode');
+    
+    // Generate PDF
+    html2pdf().set(opt).from(element).save().then(() => {
+        // Remove class after saving
+        element.classList.remove('pdf-export-mode');
+        showMessage('PDF Report downloaded!', 'success');
+    }).catch(err => {
+        console.error('PDF Generation Error:', err);
+        element.classList.remove('pdf-export-mode');
+        showMessage('Failed to generate PDF. Please try again.', 'error');
+    });
 }
 
 function displayResults(results) {
