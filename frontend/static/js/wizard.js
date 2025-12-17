@@ -99,6 +99,10 @@ function initializeAuth() {
             // Hide credits display (logout button inside will be hidden too)
             const creditsDisplayEl = document.getElementById('credits-display');
             if (creditsDisplayEl) creditsDisplayEl.style.display = 'none';
+
+            // Hide mobile badge
+            const creditsBadgeMobile = document.getElementById('credits-badge-mobile');
+            if (creditsBadgeMobile) creditsBadgeMobile.style.display = 'none';
         }
         // Re-render presets to reflect auth state (cloud vs system)
         renderPresetsInWizard();
@@ -2555,14 +2559,29 @@ async function fetchCredits() {
 function updateCreditsDisplay(credits) {
     const creditsAmountEl = document.getElementById('credits-amount');
     const creditsDisplayEl = document.getElementById('credits-display');
+    const creditsMobileEl = document.getElementById('credits-amount-mobile');
+    const creditsModalEl = document.getElementById('credits-amount-modal');
+    const creditsBadgeMobile = document.getElementById('credits-badge-mobile');
 
+    // Update all credit displays
     if (creditsAmountEl) {
         creditsAmountEl.textContent = credits;
+    }
+    if (creditsMobileEl) {
+        creditsMobileEl.textContent = credits;
+    }
+    if (creditsModalEl) {
+        creditsModalEl.textContent = credits;
     }
 
     // Show/hide credits display based on auth
     if (creditsDisplayEl) {
         creditsDisplayEl.style.display = authToken ? 'block' : 'none';
+    }
+
+    // Show/hide mobile badge based on auth
+    if (creditsBadgeMobile) {
+        creditsBadgeMobile.style.display = authToken ? 'flex' : 'none';
     }
 }
 
@@ -2654,7 +2673,70 @@ function initializeCouponModal() {
     }
 }
 
+// Initialize mobile credits modal
+function initializeMobileCreditsModal() {
+    const creditsBadgeMobile = document.getElementById('credits-badge-mobile');
+    const creditsModalMobile = document.getElementById('credits-modal-mobile');
+    const closeModalBtn = document.getElementById('close-credits-modal');
+    const addCreditsBtnMobile = document.getElementById('add-credits-btn-mobile');
+    const logoutBtnMobile = document.getElementById('logout-btn-mobile');
+    const couponModal = document.getElementById('coupon-modal');
+
+    // Open mobile credits modal when badge is clicked
+    if (creditsBadgeMobile) {
+        creditsBadgeMobile.addEventListener('click', () => {
+            if (creditsModalMobile) {
+                creditsModalMobile.style.display = 'flex';
+            }
+        });
+    }
+
+    // Close mobile credits modal
+    if (closeModalBtn) {
+        closeModalBtn.addEventListener('click', () => {
+            if (creditsModalMobile) {
+                creditsModalMobile.style.display = 'none';
+            }
+        });
+    }
+
+    // Close modal when clicking outside
+    if (creditsModalMobile) {
+        creditsModalMobile.addEventListener('click', (e) => {
+            if (e.target === creditsModalMobile) {
+                creditsModalMobile.style.display = 'none';
+            }
+        });
+    }
+
+    // Add Credits button in mobile modal
+    if (addCreditsBtnMobile) {
+        addCreditsBtnMobile.addEventListener('click', () => {
+            // Close mobile modal
+            if (creditsModalMobile) {
+                creditsModalMobile.style.display = 'none';
+            }
+            // Open coupon modal (same as desktop)
+            if (couponModal) {
+                couponModal.style.display = 'flex';
+            }
+        });
+    }
+
+    // Logout button in mobile modal
+    if (logoutBtnMobile) {
+        logoutBtnMobile.addEventListener('click', () => {
+            logout();
+            // Close mobile modal
+            if (creditsModalMobile) {
+                creditsModalMobile.style.display = 'none';
+            }
+        });
+    }
+}
+
 // Call this on page load
 document.addEventListener('DOMContentLoaded', () => {
     initializeCouponModal();
+    initializeMobileCreditsModal();
 });

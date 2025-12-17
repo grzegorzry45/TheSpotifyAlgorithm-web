@@ -751,3 +751,169 @@
         font-size: 12px;
     }
 }
+
+/* --- Credits Display --- */
+
+#credits-display {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    display: none;
+    z-index: 1000;
+    background: rgba(18, 18, 18, 0.35);
+    backdrop-filter: blur(40px) saturate(180%);
+    -webkit-backdrop-filter: blur(40px) saturate(180%);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 8px;
+    padding: 20px;
+    box-shadow:
+        0 8px 32px rgba(0, 0, 0, 0.6),
+        0 0 0 1px rgba(255, 255, 255, 0.05) inset,
+        0 20px 60px rgba(0, 0, 0, 0.4);
+    min-width: 200px;
+}
+
+/* Mobile Credits Badge (compact version) */
+#credits-badge-mobile {
+    display: none;
+    position: fixed;
+    top: 16px;
+    right: 16px;
+    z-index: 1000;
+    background: rgba(18, 18, 18, 0.85);
+    backdrop-filter: blur(40px) saturate(180%);
+    -webkit-backdrop-filter: blur(40px) saturate(180%);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 20px;
+    padding: 8px 16px;
+    cursor: pointer;
+    transition: all 0.3s var(--ease-out);
+    box-shadow:
+        0 4px 16px rgba(0, 0, 0, 0.5),
+        0 0 0 1px rgba(255, 255, 255, 0.05) inset;
+}
+
+#credits-badge-mobile:hover {
+    background: rgba(24, 24, 24, 0.9);
+    border-color: rgba(255, 255, 255, 0.25);
+    transform: scale(1.05);
+    box-shadow:
+        0 6px 20px rgba(0, 0, 0, 0.6),
+        0 0 0 1px rgba(255, 255, 255, 0.1) inset;
+}
+
+.credits-badge-content {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--primary);
+}
+
+/* Mobile Credits Modal */
+#credits-modal-mobile {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.75);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    z-index: 10000;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+}
+
+.credits-modal-content {
+    background: rgba(18, 18, 18, 0.95);
+    backdrop-filter: blur(40px) saturate(180%);
+    -webkit-backdrop-filter: blur(40px) saturate(180%);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 16px;
+    padding: 32px 24px;
+    max-width: 320px;
+    width: 100%;
+    box-shadow:
+        0 8px 32px rgba(0, 0, 0, 0.6),
+        0 0 0 1px rgba(255, 255, 255, 0.05) inset;
+    text-align: center;
+    position: relative;
+    animation: slideUpFade 0.3s var(--ease-out);
+}
+
+.credits-modal-close {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    background: transparent;
+    border: none;
+    color: var(--text-secondary);
+    font-size: 24px;
+    cursor: pointer;
+    padding: 0;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    transition: all 0.2s var(--ease-out);
+}
+
+.credits-modal-close:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: var(--text-main);
+}
+
+.credits-modal-header {
+    font-size: 11px;
+    color: #888;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    margin-bottom: 12px;
+}
+
+.credits-modal-amount {
+    font-size: 48px;
+    font-weight: 900;
+    color: var(--primary);
+    margin-bottom: 24px;
+    line-height: 1;
+}
+
+.credits-modal-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.credits-modal-buttons .btn {
+    width: 100%;
+    font-size: 14px;
+    padding: 14px 20px;
+    border-radius: 8px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+}
+
+/* Mobile Responsive */
+@media (max-width: 768px) {
+    /* Hide desktop credits display on mobile */
+    #credits-display {
+        display: none !important;
+    }
+
+    /* Show mobile badge instead */
+    #credits-badge-mobile {
+        display: flex;
+    }
+
+    /* Adjust header padding for mobile */
+    .header {
+        padding: 40px 20px 30px;
+    }
+}
