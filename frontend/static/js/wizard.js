@@ -1647,6 +1647,13 @@ function startOver() {
 }
 
 async function exportReport() {
+    // Check if we have Gatekeeper results (AI Mode)
+    if (gatekeeperResults && analysisMode === 'ai') {
+        generateGatekeeperPDF();
+        return;
+    }
+
+    // Standard mode - use backend endpoint
     if (!sessionId) {
         showMessage('No session data available for report', 'error');
         return;
@@ -1673,6 +1680,162 @@ async function exportReport() {
     } catch (error) {
         console.error('Report error:', error);
         showMessage('Report generation failed: ' + error.message, 'error');
+    }
+}
+
+function generateGatekeeperPDF() {
+    try {
+        // Access jsPDF from window
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF();
+
+        // Get filename
+        const filename = gatekeeperResults.user_features?.filename || 'Unknown Track';
+
+        // Title
+        doc.setFontSize(20);
+        doc.setTextColor(29, 185, 84); // Spotify green
+        doc.text('Golden 8 Analysis Report', 105, 20, { align: 'center' });
+
+        // Subtitle
+        doc.setFontSize(12);
+        doc.setTextColor(100, 100, 100);
+        doc.text(`Analyzed file: ${filename}`, 105, 30, { align: 'center' });
+
+        // Date
+        doc.setFontSize(10);
+        const date = new Date().toLocaleString('en-US', {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit'
+        });
+        doc.text(`Generated: ${date}`, 105, 38, { align: 'center' });
+
+        // Golden 8 parameters
+        const golden8Order = [
+            { key: 'bpm', label: 'BPM', unit: '' },
+            { key: 'beat_strength', label: 'Beat Strength', unit: '' },
+            { key: 'onset_rate', label: 'Onset Rate', unit: '/s' },
+            { key: 'energy', label: 'Energy', unit: '' },
+            { key: 'danceability', label: 'Danceability (Pulse Clarity)', unit: '' },
+            { key: 'spectral_rolloff', label: 'Spectral Rolloff', unit: ' Hz' },
+            { key: 'spectral_flatness', label: 'Spectral Flatness', unit: '' },
+            { key: 'dynamic_range', label: 'Dynamic Range', unit: ' dB' }
+        ];
+
+        // Prepare table data
+        const tableData = [];
+        const userFeatures = gatekeeperResults.user_features;
+        const refFeatures = gatekeeperResults.nearest_reference;
+        const zScores = gatekeeperResults.weighted_z_scores;
+
+        golden8Order.forEach(param => {
+            const userVal = userFeatures[param.key];
+            const refVal = refFeatures[param.key];
+            const zData = zScores[param.key];
+            const weightedZ = zData.weighted_z;
+
+            // Determine status based on Z-score
+            let status = '✓ Good';
+            if (Math.abs(weightedZ) > 2.0) status = '✗ Critical';
+            else if (Math.abs(weightedZ) > 1.5) status = '⚠ Warning';
+
+            tableData.push([
+                param.label,
+                userVal.toFixed(2) + param.unit,
+                refVal.toFixed(2) + param.unit,
+                weightedZ.toFixed(2),
+                status
+            ]);
+        });
+
+        // Create table
+        doc.autoTable({
+            startY: 50,
+            head: [['Parameter', 'Your Track', 'Reference', 'Z-Score', 'Status']],
+            body: tableData,
+            theme: 'grid',
+            styles: {
+                fontSize: 9,
+                cellPadding: 4,
+                overflow: 'linebreak'
+            },
+            headStyles: {
+                fillColor: [29, 185, 84],
+                textColor: [255, 255, 255],
+                fontStyle: 'bold',
+                halign: 'center'
+            },
+            columnStyles: {
+                0: { cellWidth: 45, fontStyle: 'bold' },
+                1: { cellWidth: 30, halign: 'right' },
+                2: { cellWidth: 30, halign: 'right' },
+                3: { cellWidth: 25, halign: 'right', fontStyle: 'bold' },
+                4: { cellWidth: 30, halign: 'center' }
+            },
+            didParseCell: function(data) {
+                // Color Z-Score column based on value
+                if (data.column.index === 3 && data.section === 'body') {
+                    const zScore = parseFloat(data.cell.text[0]);
+                    if (Math.abs(zScore) > 2.0) {
+                        data.cell.styles.textColor = [255, 107, 107]; // red
+                    } else if (Math.abs(zScore) > 1.5) {
+                        data.cell.styles.textColor = [255, 193, 7]; // yellow
+                    } else {
+                        data.cell.styles.textColor = [29, 185, 84]; // green
+                    }
+                }
+
+                // Color Status column
+                if (data.column.index === 4 && data.section === 'body') {
+                    const status = data.cell.text[0];
+                    if (status.includes('Critical')) {
+                        data.cell.styles.textColor = [255, 107, 107];
+                    } else if (status.includes('Warning')) {
+                        data.cell.styles.textColor = [255, 193, 7];
+                    } else {
+                        data.cell.styles.textColor = [29, 185, 84];
+                    }
+                }
+            }
+        });
+
+        // Critical Alerts section
+        const finalY = doc.lastAutoTable.finalY + 15;
+
+        if (gatekeeperResults.critical_alerts && gatekeeperResults.critical_alerts.length > 0) {
+            doc.setFontSize(14);
+            doc.setTextColor(0, 0, 0);
+            doc.text('Critical Alerts:', 14, finalY);
+
+            doc.setFontSize(10);
+            doc.setTextColor(255, 107, 107);
+            let alertY = finalY + 7;
+            gatekeeperResults.critical_alerts.forEach(alert => {
+                const lines = doc.splitTextToSize(`• ${alert}`, 180);
+                doc.text(lines, 14, alertY);
+                alertY += lines.length * 5;
+            });
+        }
+
+        // Footer
+        const pageHeight = doc.internal.pageSize.height;
+        doc.setFontSize(8);
+        doc.setTextColor(150, 150, 150);
+        doc.text('Generated by The Spotify Algorithm', 105, pageHeight - 10, { align: 'center' });
+        doc.text('https://thespotifyalgorithm.com', 105, pageHeight - 5, { align: 'center' });
+
+        // Save PDF
+        const pdfFilename = `Golden8_Report_${filename.replace(/[^a-z0-9]/gi, '_')}_${Date.now()}.pdf`;
+        doc.save(pdfFilename);
+
+        showMessage('PDF report generated successfully!', 'success');
+
+    } catch (error) {
+        console.error('PDF generation error:', error);
+        showMessage('PDF generation failed: ' + error.message, 'error');
     }
 }
 
