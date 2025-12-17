@@ -255,6 +255,19 @@ function hideProgressModal() {
         clearInterval(progressModalInterval);
         progressModalInterval = null;
     }
+
+    // Reset abort controller
+    abortController = null;
+}
+
+function cancelAnalysis() {
+    if (abortController) {
+        abortController.abort();
+        console.log('Analysis cancelled by user');
+    }
+
+    hideProgressModal();
+    showMessage('Analysis cancelled', 'error');
 }
 
 function updateProgressModal(progress, message) {
@@ -299,11 +312,21 @@ function initializeWizard() {
         // Params Modal
         initializeParamsModal();
 
+        // Progress Modal Cancel Button
+        initializeProgressModalCancel();
+
         // Load presets if any (will be called by initializeAuth's updateUIState)
         // loadPresetsForWizard();
     } catch (error) {
         console.error("Wizard initialization failed:", error);
         alert("Wizard initialization failed. Please reload the page. Error: " + error.message);
+    }
+}
+
+function initializeProgressModalCancel() {
+    const cancelBtn = document.getElementById('cancel-analysis-btn');
+    if (cancelBtn) {
+        cancelBtn.addEventListener('click', cancelAnalysis);
     }
 }
 
@@ -475,6 +498,9 @@ async function analyzePlaylistGatekeeper() {
     }, 2500); // Change message every 2.5 seconds
 
     try {
+        // Create abort controller for cancellation
+        abortController = new AbortController();
+
         const formData = new FormData();
         playlistFiles.forEach(file => {
             formData.append('files', file);
@@ -483,7 +509,8 @@ async function analyzePlaylistGatekeeper() {
         const response = await fetch(`${API_BASE}/api/gatekeeper/analyze-playlist`, {
             method: 'POST',
             headers: getAuthHeaders(),
-            body: formData
+            body: formData,
+            signal: abortController.signal
         });
 
         if (!response.ok) {
@@ -525,8 +552,14 @@ async function analyzePlaylistGatekeeper() {
 
     } catch (error) {
         hideProgressModal();
-        console.error('Gatekeeper playlist analysis error:', error);
-        showMessage('Analysis failed: ' + error.message, 'error');
+
+        if (error.name === 'AbortError') {
+            console.log('Gatekeeper playlist analysis cancelled');
+            showMessage('Analysis cancelled', 'error');
+        } else {
+            console.error('Gatekeeper playlist analysis error:', error);
+            showMessage('Analysis failed: ' + error.message, 'error');
+        }
     }
 }
 
@@ -565,6 +598,9 @@ async function compareTrackGatekeeper() {
     }, 2500); // Change message every 2.5 seconds
 
     try {
+        // Create abort controller for cancellation
+        abortController = new AbortController();
+
         const formData = new FormData();
         formData.append('user_track', userTrackFile);
         formData.append('session_id', sessionId);
@@ -572,7 +608,8 @@ async function compareTrackGatekeeper() {
         const response = await fetch(`${API_BASE}/api/gatekeeper/check`, {
             method: 'POST',
             headers: getAuthHeaders(),
-            body: formData
+            body: formData,
+            signal: abortController.signal
         });
 
         if (!response.ok) {
@@ -601,8 +638,14 @@ async function compareTrackGatekeeper() {
 
     } catch (error) {
         hideProgressModal();
-        console.error('Gatekeeper check error:', error);
-        showMessage('Track check failed: ' + error.message, 'error');
+
+        if (error.name === 'AbortError') {
+            console.log('Gatekeeper track check cancelled');
+            showMessage('Analysis cancelled', 'error');
+        } else {
+            console.error('Gatekeeper check error:', error);
+            showMessage('Track check failed: ' + error.message, 'error');
+        }
     }
 }
 
@@ -947,13 +990,21 @@ async function analyzePlaylist() {
         // Upload files with progress
         const formData = new FormData();
         playlistFiles.forEach(file => formData.append('files', file));
-        
+
         // Use XHR for upload progress
         const uploadResponse = await new Promise((resolve, reject) => {
             const xhr = new XMLHttpRequest();
             xhr.open('POST', `${API_BASE}/api/upload/playlist`);
             xhr.setRequestHeader('Authorization', getAuthHeaders().Authorization); // Add auth header
-            
+
+            // Handle abort signal
+            if (abortController) {
+                abortController.signal.addEventListener('abort', () => {
+                    xhr.abort();
+                    reject(new DOMException('Upload aborted', 'AbortError'));
+                });
+            }
+
             xhr.upload.onprogress = (e) => {
                 if (e.lengthComputable) {
                     const percent = (e.loaded / e.total) * 40; // Allocate 40% for upload
@@ -962,7 +1013,7 @@ async function analyzePlaylist() {
                     updateProgressModal(percent, `Uploading: ${mbLoaded}MB / ${mbTotal}MB (${playlistFiles.length} files)`);
                 }
             };
-            
+
             xhr.onload = () => {
                 if (xhr.status >= 200 && xhr.status < 300) {
                     resolve(JSON.parse(xhr.responseText));
@@ -970,8 +1021,9 @@ async function analyzePlaylist() {
                     reject(new Error('Upload failed'));
                 }
             };
-            
+
             xhr.onerror = () => reject(new Error('Upload network error'));
+            xhr.onabort = () => reject(new DOMException('Upload aborted', 'AbortError'));
             xhr.send(formData);
         });
 
