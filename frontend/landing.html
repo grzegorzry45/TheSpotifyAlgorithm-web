@@ -1,0 +1,696 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Spotify Algorithm - Decode. Match. Dominate.</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+    <style>
+        /* Landing Page Specific Styles */
+        body {
+            margin: 0;
+            padding: 0;
+            overflow-x: hidden;
+        }
+
+        .landing-container {
+            min-height: 100vh;
+            background: linear-gradient(135deg, #0a0e27 0%, #1a1a2e 50%, #16213e 100%);
+            color: var(--text-primary);
+        }
+
+        /* Hero Section */
+        .hero {
+            text-align: center;
+            padding: 80px 20px 120px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: radial-gradient(circle at 50% 50%, rgba(29, 185, 84, 0.1) 0%, transparent 70%);
+            pointer-events: none;
+        }
+
+        .hero-content {
+            position: relative;
+            z-index: 1;
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .hero-logo {
+            font-size: 48px;
+            font-weight: 900;
+            background: linear-gradient(135deg, #1DB954 0%, #1ed760 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 20px;
+            letter-spacing: 2px;
+        }
+
+        .hero-tagline {
+            font-size: 32px;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 20px;
+            line-height: 1.3;
+        }
+
+        .hero-subtitle {
+            font-size: 18px;
+            color: var(--text-secondary);
+            margin-bottom: 40px;
+            line-height: 1.6;
+        }
+
+        .hero-cta {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-bottom: 60px;
+        }
+
+        .cta-button {
+            padding: 18px 40px;
+            font-size: 16px;
+            font-weight: 700;
+            border-radius: var(--radius-lg);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+            border: none;
+        }
+
+        .cta-primary {
+            background: var(--primary);
+            color: white;
+            box-shadow: 0 4px 20px rgba(29, 185, 84, 0.4);
+        }
+
+        .cta-primary:hover {
+            background: var(--primary-hover);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 30px rgba(29, 185, 84, 0.6);
+        }
+
+        .cta-secondary {
+            background: rgba(255, 255, 255, 0.05);
+            color: var(--text-primary);
+            border: 2px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .cta-secondary:hover {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: rgba(255, 255, 255, 0.2);
+        }
+
+        .hero-badge {
+            display: inline-block;
+            padding: 8px 20px;
+            background: rgba(29, 185, 84, 0.15);
+            border: 1px solid rgba(29, 185, 84, 0.3);
+            border-radius: 20px;
+            color: var(--primary);
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        /* Features Section */
+        .features {
+            padding: 80px 20px;
+            background: rgba(0, 0, 0, 0.2);
+        }
+
+        .section-title {
+            text-align: center;
+            font-size: 36px;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 60px;
+        }
+
+        .features-grid {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 30px;
+        }
+
+        .feature-card {
+            background: var(--bg-surface);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: var(--radius-lg);
+            padding: 40px;
+            transition: all 0.3s ease;
+        }
+
+        .feature-card:hover {
+            border-color: var(--primary);
+            box-shadow: 0 8px 30px rgba(29, 185, 84, 0.2);
+            transform: translateY(-5px);
+        }
+
+        .feature-icon {
+            font-size: 48px;
+            margin-bottom: 20px;
+        }
+
+        .feature-title {
+            font-size: 22px;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 15px;
+        }
+
+        .feature-description {
+            font-size: 15px;
+            color: var(--text-secondary);
+            line-height: 1.6;
+        }
+
+        /* How It Works Section */
+        .how-it-works {
+            padding: 80px 20px;
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        .steps {
+            display: flex;
+            flex-direction: column;
+            gap: 40px;
+            margin-top: 40px;
+        }
+
+        .step {
+            display: flex;
+            gap: 30px;
+            align-items: flex-start;
+        }
+
+        .step-number {
+            flex-shrink: 0;
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, var(--primary) 0%, #1ed760 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            font-weight: 900;
+            color: white;
+        }
+
+        .step-content h3 {
+            font-size: 22px;
+            color: var(--text-primary);
+            margin-bottom: 10px;
+        }
+
+        .step-content p {
+            font-size: 16px;
+            color: var(--text-secondary);
+            line-height: 1.6;
+        }
+
+        /* Modes Section */
+        .modes {
+            padding: 80px 20px;
+            background: rgba(0, 0, 0, 0.2);
+        }
+
+        .modes-grid {
+            max-width: 1000px;
+            margin: 40px auto 0;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(450px, 1fr));
+            gap: 30px;
+        }
+
+        .mode-card {
+            background: var(--bg-surface);
+            border: 2px solid rgba(255, 255, 255, 0.05);
+            border-radius: var(--radius-lg);
+            padding: 40px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .mode-card.featured {
+            border-color: var(--primary);
+            box-shadow: 0 0 30px rgba(29, 185, 84, 0.3);
+        }
+
+        .mode-badge {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            padding: 6px 16px;
+            background: var(--primary);
+            color: white;
+            font-size: 12px;
+            font-weight: 700;
+            border-radius: 20px;
+        }
+
+        .mode-title {
+            font-size: 28px;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 15px;
+        }
+
+        .mode-description {
+            font-size: 16px;
+            color: var(--text-secondary);
+            margin-bottom: 25px;
+            line-height: 1.6;
+        }
+
+        .mode-features {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .mode-features li {
+            padding: 10px 0;
+            color: var(--text-secondary);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .mode-features li::before {
+            content: '✓';
+            color: var(--primary);
+            font-weight: 900;
+            font-size: 18px;
+        }
+
+        /* Social Proof */
+        .social-proof {
+            padding: 60px 20px;
+            text-align: center;
+        }
+
+        .stats-grid {
+            max-width: 900px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 40px;
+        }
+
+        .stat {
+            padding: 30px;
+        }
+
+        .stat-number {
+            font-size: 48px;
+            font-weight: 900;
+            background: linear-gradient(135deg, var(--primary) 0%, #1ed760 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 10px;
+        }
+
+        .stat-label {
+            font-size: 16px;
+            color: var(--text-secondary);
+        }
+
+        /* Final CTA */
+        .final-cta {
+            padding: 80px 20px;
+            background: linear-gradient(135deg, rgba(29, 185, 84, 0.1) 0%, rgba(29, 185, 84, 0.05) 100%);
+            text-align: center;
+        }
+
+        .final-cta h2 {
+            font-size: 36px;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 20px;
+        }
+
+        .final-cta p {
+            font-size: 18px;
+            color: var(--text-secondary);
+            margin-bottom: 40px;
+        }
+
+        /* Footer */
+        .footer {
+            padding: 40px 20px;
+            text-align: center;
+            background: rgba(0, 0, 0, 0.3);
+            color: var(--text-secondary);
+            font-size: 14px;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .hero-logo {
+                font-size: 36px;
+            }
+
+            .hero-tagline {
+                font-size: 24px;
+            }
+
+            .hero-subtitle {
+                font-size: 16px;
+            }
+
+            .section-title {
+                font-size: 28px;
+            }
+
+            .features-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .modes-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .step {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .step-number {
+                margin: 0 auto;
+            }
+        }
+
+        /* Simple header for landing */
+        .landing-header {
+            padding: 20px 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(10px);
+        }
+
+        .landing-logo {
+            font-size: 20px;
+            font-weight: 900;
+            color: var(--primary);
+        }
+
+        .landing-nav {
+            display: flex;
+            gap: 15px;
+        }
+
+        .nav-btn {
+            padding: 10px 20px;
+            font-size: 14px;
+            font-weight: 600;
+            border-radius: var(--radius-md);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            border: none;
+            background: transparent;
+            color: var(--text-secondary);
+        }
+
+        .nav-btn:hover {
+            color: var(--text-primary);
+        }
+
+        .nav-btn.primary {
+            background: var(--primary);
+            color: white;
+        }
+
+        .nav-btn.primary:hover {
+            background: var(--primary-hover);
+        }
+    </style>
+</head>
+<body>
+    <div class="landing-container">
+        <!-- Header -->
+        <header class="landing-header">
+            <div class="landing-logo">THE SPOTIFY ALGORITHM</div>
+            <nav class="landing-nav">
+                <button class="nav-btn" onclick="scrollToSection('features')">Features</button>
+                <button class="nav-btn" onclick="scrollToSection('how-it-works')">How It Works</button>
+                <button class="nav-btn" id="login-nav-btn">Login</button>
+                <button class="nav-btn primary" id="signup-nav-btn">Get Started Free</button>
+            </nav>
+        </header>
+
+        <!-- Hero Section -->
+        <section class="hero">
+            <div class="hero-content">
+                <div class="hero-badge">🎵 AI-Powered Audio Analysis</div>
+                <h1 class="hero-logo">THE SPOTIFY ALGORITHM</h1>
+                <h2 class="hero-tagline">Decode. Match. Dominate.</h2>
+                <p class="hero-subtitle">
+                    Analyze your tracks against Spotify playlists with professional-grade AI.
+                    Get instant feedback on what makes hits hit, and optimize your music for maximum playlist placement.
+                </p>
+                <div class="hero-cta">
+                    <button class="cta-button cta-primary" id="get-started-btn">
+                        🚀 Start Free Analysis
+                    </button>
+                    <button class="cta-button cta-secondary" onclick="scrollToSection('how-it-works')">
+                        See How It Works
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Features Section -->
+        <section class="features" id="features">
+            <h2 class="section-title">Why Artists & Producers Choose Us</h2>
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">🎯</div>
+                    <h3 class="feature-title">AI-Powered Gatekeeper Mode</h3>
+                    <p class="feature-description">
+                        Upload a playlist, analyze your track, and get instant feedback on what needs to change.
+                        Our AI identifies critical issues using the Golden 8 parameters that curators actually care about.
+                    </p>
+                </div>
+
+                <div class="feature-card">
+                    <div class="feature-icon">🔬</div>
+                    <h3 class="feature-title">Deep Audio Analysis</h3>
+                    <p class="feature-description">
+                        40+ audio parameters analyzed: BPM, energy, spectral content, dynamic range, and more.
+                        See exactly how your track compares to playlist standards.
+                    </p>
+                </div>
+
+                <div class="feature-card">
+                    <div class="feature-icon">⚡</div>
+                    <h3 class="feature-title">Instant Recommendations</h3>
+                    <p class="feature-description">
+                        Get actionable suggestions in seconds. Know exactly what to adjust in your mix, master, or production
+                        to match your target playlist's sonic profile.
+                    </p>
+                </div>
+
+                <div class="feature-card">
+                    <div class="feature-icon">📊</div>
+                    <h3 class="feature-title">Beautiful Reports</h3>
+                    <p class="feature-description">
+                        Export professional PDF reports with all analysis data, comparisons, and recommendations.
+                        Perfect for sharing with your team or clients.
+                    </p>
+                </div>
+
+                <div class="feature-card">
+                    <div class="feature-icon">💾</div>
+                    <h3 class="feature-title">Save & Reuse Presets</h3>
+                    <p class="feature-description">
+                        Analyze a playlist once, save it as a preset, and compare unlimited tracks against it.
+                        Perfect for targeting multiple playlists or testing different versions.
+                    </p>
+                </div>
+
+                <div class="feature-card">
+                    <div class="feature-icon">🎨</div>
+                    <h3 class="feature-title">Multiple Analysis Modes</h3>
+                    <p class="feature-description">
+                        Standard mode for flexible comparisons, or AI Gatekeeper mode for quick pass/fail verdicts.
+                        Choose the workflow that fits your needs.
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <!-- How It Works -->
+        <section class="how-it-works" id="how-it-works">
+            <h2 class="section-title">How It Works</h2>
+            <div class="steps">
+                <div class="step">
+                    <div class="step-number">1</div>
+                    <div class="step-content">
+                        <h3>Upload Your Target Playlist</h3>
+                        <p>
+                            Select 2-30 tracks from the playlist you're targeting. Our AI analyzes every track
+                            to create a comprehensive sonic profile of what the playlist curator is looking for.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="step">
+                    <div class="step-number">2</div>
+                    <div class="step-content">
+                        <h3>Analyze Your Track</h3>
+                        <p>
+                            Upload your track and let our professional-grade audio analysis engine extract 40+ parameters.
+                            We examine everything from BPM and energy to spectral content and dynamic range.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="step">
+                    <div class="step-number">3</div>
+                    <div class="step-content">
+                        <h3>Get Instant Feedback</h3>
+                        <p>
+                            See your match score, critical alerts, and the Golden 8 comparison table.
+                            Understand exactly where your track fits and what needs adjustment.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="step">
+                    <div class="step-number">4</div>
+                    <div class="step-content">
+                        <h3>Optimize & Export</h3>
+                        <p>
+                            Use our AI-generated recommendations to refine your track. Export professional PDF reports
+                            to share with your team, or use our LLM prompt for deeper A&R insights.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Modes Section -->
+        <section class="modes">
+            <h2 class="section-title">Choose Your Analysis Mode</h2>
+            <div class="modes-grid">
+                <div class="mode-card">
+                    <h3 class="mode-title">🎛️ Standard Mode</h3>
+                    <p class="mode-description">
+                        Flexible analysis with full control over which parameters to analyze.
+                        Perfect for detailed comparisons and comprehensive reports.
+                    </p>
+                    <ul class="mode-features">
+                        <li>Choose from 40+ audio parameters</li>
+                        <li>Batch compare multiple tracks</li>
+                        <li>Save and load custom presets</li>
+                        <li>1:1 track comparisons</li>
+                        <li>Export HTML reports</li>
+                    </ul>
+                </div>
+
+                <div class="mode-card featured">
+                    <div class="mode-badge">RECOMMENDED</div>
+                    <h3 class="mode-title">🤖 AI Gatekeeper Mode</h3>
+                    <p class="mode-description">
+                        Fast, AI-powered pass/fail analysis using the Golden 8 parameters.
+                        Get instant verdicts with actionable recommendations.
+                    </p>
+                    <ul class="mode-features">
+                        <li>Automatic Golden 8 parameter analysis</li>
+                        <li>Instant match scores and alerts</li>
+                        <li>Z-score based comparisons</li>
+                        <li>AI verdict prompts for ChatGPT/Claude</li>
+                        <li>Export professional PDF reports</li>
+                        <li>Nearest neighbor reference matching</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <!-- Social Proof -->
+        <section class="social-proof">
+            <div class="stats-grid">
+                <div class="stat">
+                    <div class="stat-number">40+</div>
+                    <div class="stat-label">Audio Parameters</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-number">8</div>
+                    <div class="stat-label">Golden Parameters</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-number">Fast</div>
+                    <div class="stat-label">Analysis Speed</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Final CTA -->
+        <section class="final-cta">
+            <h2>Ready to Match the Algorithm?</h2>
+            <p>Start analyzing your tracks today and get the insights you need to dominate playlists.</p>
+            <div class="hero-cta">
+                <button class="cta-button cta-primary" id="final-cta-btn">
+                    🚀 Start Free Analysis
+                </button>
+            </div>
+        </section>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <p>&copy; 2024 The Spotify Algorithm. All rights reserved.</p>
+            <p style="margin-top: 10px; opacity: 0.6;">Public Beta v.118 by GR</p>
+        </footer>
+    </div>
+
+    <script>
+        // Smooth scroll function
+        function scrollToSection(id) {
+            const element = document.getElementById(id);
+            if (element) {
+                element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+        }
+
+        // Check if user is logged in
+        function checkAuthAndRedirect() {
+            const token = localStorage.getItem('access_token');
+            if (token) {
+                // User is logged in, redirect to wizard
+                window.location.href = '/wizard';
+            } else {
+                // User not logged in, show signup/login modal
+                // For now, just redirect to wizard (since auth is disabled)
+                window.location.href = '/wizard';
+            }
+        }
+
+        // Add event listeners to all CTA buttons
+        document.getElementById('get-started-btn').addEventListener('click', checkAuthAndRedirect);
+        document.getElementById('final-cta-btn').addEventListener('click', checkAuthAndRedirect);
+        document.getElementById('signup-nav-btn').addEventListener('click', checkAuthAndRedirect);
+        document.getElementById('login-nav-btn').addEventListener('click', checkAuthAndRedirect);
+    </script>
+</body>
+</html>

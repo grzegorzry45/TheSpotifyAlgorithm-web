@@ -119,7 +119,23 @@ def deduct_credits(user: models.User, cost: int, db: Session, description: str):
 
 @app.get("/", response_class=HTMLResponse)
 async def root():
-    """Serve the simplified wizard frontend (feature branch)"""
+    """Serve the landing page for logged-out users"""
+    frontend_path = FRONTEND_DIR / "landing.html"
+    if frontend_path.exists():
+        return FileResponse(
+            frontend_path,
+            headers={
+                "Cache-Control": "no-cache, no-store, must-revalidate",
+                "Pragma": "no-cache",
+                "Expires": "0"
+            }
+        )
+    return {"message": "The Algorithm API is running. Landing page not found."}
+
+
+@app.get("/wizard", response_class=HTMLResponse)
+async def wizard():
+    """Serve the main wizard interface"""
     frontend_path = FRONTEND_DIR / "index-wizard.html"
     if frontend_path.exists():
         return FileResponse(
@@ -130,18 +146,7 @@ async def root():
                 "Expires": "0"
             }
         )
-    # Fallback to original
-    frontend_path = FRONTEND_DIR / "index.html"
-    if frontend_path.exists():
-        return FileResponse(
-            frontend_path,
-            headers={
-                "Cache-Control": "no-cache, no-store, must-revalidate",
-                "Pragma": "no-cache",
-                "Expires": "0"
-            }
-        )
-    return {"message": "The Algorithm API is running. Frontend not found."}
+    return {"message": "Wizard interface not found."}
 
 
 @app.get("/classic", response_class=HTMLResponse)
