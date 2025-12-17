@@ -429,11 +429,11 @@ function switchAnalysisMode(mode) {
         aiModeInfo.style.display = mode === 'ai' ? 'block' : 'none';
     }
 
-    // In Step 2: Hide parameter selection in AI Mode
-    const parameterSelection = document.querySelector('.parameter-selection-wizard');
-    if (parameterSelection) {
-        parameterSelection.style.display = mode === 'ai' ? 'none' : 'block';
-    }
+    // Hide ALL parameter selection sections in AI Mode
+    const parameterSelections = document.querySelectorAll('.parameter-selection-wizard');
+    parameterSelections.forEach(section => {
+        section.style.display = mode === 'ai' ? 'none' : 'block';
+    });
 
     // Update compare button state
     updateCompareButton();
@@ -497,8 +497,12 @@ async function analyzePlaylistGatekeeper() {
         sessionId = data.session_id;
         document.getElementById('session-id').textContent = sessionId;
 
-        // Store playlist profile for preset saving (convert Gatekeeper format to standard profile format)
-        playlistProfile = data.playlist_features;
+        // Store playlist profile for preset saving
+        // Wrap Gatekeeper data with mode identifier
+        playlistProfile = {
+            mode: 'gatekeeper',
+            tracks: data.playlist_features
+        };
         playlistAnalysis = data.playlist_features;
 
         // Update credits
@@ -609,9 +613,9 @@ function showSavePresetModalGatekeeper() {
         return;
     }
 
-    // Show the save preset modal
+    // Show the save preset modal (use 'flex' to center it)
     const modal = document.getElementById('save-preset-modal');
-    modal.style.display = 'block';
+    modal.style.display = 'flex';
 
     // Override the cancel button to go to Step 2
     const cancelBtn = document.getElementById('preset-save-cancel-wizard');
@@ -1182,7 +1186,7 @@ function showSavePresetModal() {
         showMessage('Please analyze a playlist first', 'error');
         return;
     }
-    document.getElementById('save-preset-modal').style.display = 'block';
+    document.getElementById('save-preset-modal').style.display = 'flex';
 }
 
 async function savePreset() {
@@ -1658,12 +1662,20 @@ function goToStep(stepNumber) {
         }
     });
 
-    // If going to Step 2 in AI Mode, ensure parameter selection is hidden
+    // If going to Step 2 in AI Mode, ensure ALL parameter selections are hidden
     if (stepNumber === 2 && analysisMode === 'ai') {
-        const parameterSelection = document.querySelector('.parameter-selection-wizard');
-        if (parameterSelection) {
-            parameterSelection.style.display = 'none';
-        }
+        const parameterSelections = document.querySelectorAll('.parameter-selection-wizard');
+        parameterSelections.forEach(section => {
+            section.style.display = 'none';
+        });
+    }
+
+    // If going to Step 1 or Step 2 in Standard Mode, ensure parameter selections are visible
+    if ((stepNumber === 1 || stepNumber === 2) && analysisMode === 'standard') {
+        const parameterSelections = document.querySelectorAll('.parameter-selection-wizard');
+        parameterSelections.forEach(section => {
+            section.style.display = 'block';
+        });
     }
 
     // Scroll to top
@@ -2085,7 +2097,7 @@ function showSavePresetModal() {
         showMessage('Please analyze a playlist first', 'error');
         return;
     }
-    document.getElementById('save-preset-modal').style.display = 'block';
+    document.getElementById('save-preset-modal').style.display = 'flex';
 }
 
 async function savePreset() {
