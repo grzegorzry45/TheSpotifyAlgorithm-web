@@ -387,9 +387,14 @@
 
                 <!-- Golden 8 Comparison -->
                 <div class="results-summary" style="margin-bottom: 32px;">
-                    <h3 style="display: flex; align-items: center; gap: 12px; margin-bottom: 16px;">
-                        <img src="/static/icons/analysis.svg" class="icon-svg medium" alt=""> Golden 8 Comparison
-                    </h3>
+                    <div class="results-header-centered" style="text-align: center; margin-bottom: 24px;">
+                        <h3 style="display: flex; align-items: center; justify-content: center; gap: 12px; margin-bottom: 12px;">
+                            <img src="/static/icons/analysis.svg" class="icon-svg medium" alt=""> Golden 8 Comparison
+                        </h3>
+                        <p id="gatekeeper-filename-display" style="color: var(--text-secondary); font-size: 14px; margin: 0;">
+                            Analyzed file - <span class="filename-highlight" style="color: var(--primary); font-family: var(--font-mono);"></span>
+                        </p>
+                    </div>
                     <div id="golden-8-comparison" class="comparison-table">
                         <!-- Will be populated by JavaScript -->
                     </div>

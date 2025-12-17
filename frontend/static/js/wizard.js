@@ -689,6 +689,15 @@ function displayGatekeeperResults(data) {
     document.getElementById('results-container').style.display = 'none';
     document.getElementById('ai-mode-results-container').style.display = 'block';
 
+    // Update analyzed filename display
+    const filenameSpan = document.querySelector('#gatekeeper-filename-display span');
+    if (filenameSpan && data.user_features && data.user_features.filename) {
+        filenameSpan.textContent = data.user_features.filename;
+    } else if (filenameSpan && userTrackFile) {
+        // Fallback to client-side file name if backend doesn't return it
+        filenameSpan.textContent = userTrackFile.name;
+    }
+
     // Display critical alerts
     displayCriticalAlerts(data.critical_alerts);
 
