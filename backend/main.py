@@ -634,12 +634,24 @@ async def load_preset(
 
     # Create new session with preset data
     session_id = "preset_" + str(uuid.uuid4())
-    sessions[session_id] = {
+
+    # Check if this is a Gatekeeper preset
+    preset_mode = None
+    if isinstance(profile, dict) and profile.get("mode") == "gatekeeper":
+        preset_mode = "gatekeeper"
+
+    session_data = {
         "playlist_files": [],
         "user_files": [],
         "playlist_profile": profile,
         "playlist_analysis": analysis
     }
+
+    # Set mode if it's a Gatekeeper preset
+    if preset_mode:
+        session_data["mode"] = preset_mode
+
+    sessions[session_id] = session_data
 
     return {
         "session_id": session_id,
