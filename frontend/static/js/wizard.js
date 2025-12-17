@@ -452,6 +452,28 @@ async function analyzePlaylistGatekeeper() {
     showProgressModal('Analyzing Playlist (AI Mode)...');
     updateProgressModal(5, 'Extracting Golden 8 parameters using native sample rate...');
 
+    // Rotating messages to keep user engaged during long analysis
+    const waitMessages = [
+        '🎵 Extracting Golden 8 parameters using native sample rate...',
+        '🔬 Analyzing audio features with high precision...',
+        '📊 Processing spectral content...',
+        '🎼 Detecting tempo and rhythm patterns...',
+        '⚡ Computing energy distribution...',
+        '🎹 Analyzing harmonic structure...',
+        '📝 Creating final profile...',
+        '🔄 Gathering full data...',
+        '⏰ Be patient, just a moment...',
+        '✨ Finalizing analysis...'
+    ];
+
+    let messageIndex = 0;
+    if (progressModalInterval) clearInterval(progressModalInterval);
+    progressModalInterval = setInterval(() => {
+        const msg = waitMessages[messageIndex % waitMessages.length];
+        updateProgressModal(10 + (messageIndex % 80), msg); // Progress 10-90%
+        messageIndex++;
+    }, 2500); // Change message every 2.5 seconds
+
     try {
         const formData = new FormData();
         playlistFiles.forEach(file => {
@@ -475,6 +497,10 @@ async function analyzePlaylistGatekeeper() {
         sessionId = data.session_id;
         document.getElementById('session-id').textContent = sessionId;
 
+        // Store playlist profile for preset saving (convert Gatekeeper format to standard profile format)
+        playlistProfile = data.playlist_features;
+        playlistAnalysis = data.playlist_features;
+
         // Update credits
         if (data.credits_remaining !== undefined) {
             updateCreditsDisplay(data.credits_remaining);
@@ -488,10 +514,10 @@ async function analyzePlaylistGatekeeper() {
 
         showMessage(`✓ Playlist analyzed! ${data.tracks_analyzed} tracks processed using Golden 8.`, 'success');
 
-        // Move to Step 2
+        // Show modal asking to save as preset
         setTimeout(() => {
-            goToStep(2);
-        }, 1000);
+            showSavePresetModalGatekeeper();
+        }, 500);
 
     } catch (error) {
         hideProgressModal();
@@ -513,6 +539,26 @@ async function compareTrackGatekeeper() {
 
     showProgressModal('Checking Track (AI Mode)...');
     updateProgressModal(5, 'Analyzing your track against playlist profile...');
+
+    // Rotating messages to keep user engaged during analysis
+    const waitMessages = [
+        '🔬 Analyzing your track against playlist profile...',
+        '📊 Extracting Golden 8 parameters...',
+        '🎯 Finding nearest reference track...',
+        '📝 Calculating weighted Z-scores...',
+        '🔄 Processing comparisons...',
+        '🤖 Generating LLM prompt...',
+        '✨ Finalizing results...',
+        '⏰ Be patient, just a moment...'
+    ];
+
+    let messageIndex = 0;
+    if (progressModalInterval) clearInterval(progressModalInterval);
+    progressModalInterval = setInterval(() => {
+        const msg = waitMessages[messageIndex % waitMessages.length];
+        updateProgressModal(10 + (messageIndex % 80), msg); // Progress 10-90%
+        messageIndex++;
+    }, 2500); // Change message every 2.5 seconds
 
     try {
         const formData = new FormData();
@@ -554,6 +600,41 @@ async function compareTrackGatekeeper() {
         console.error('Gatekeeper check error:', error);
         showMessage('Track check failed: ' + error.message, 'error');
     }
+}
+
+function showSavePresetModalGatekeeper() {
+    if (!playlistProfile) {
+        // If no profile, just go to Step 2
+        goToStep(2);
+        return;
+    }
+
+    // Show the save preset modal
+    const modal = document.getElementById('save-preset-modal');
+    modal.style.display = 'block';
+
+    // Override the cancel button to go to Step 2
+    const cancelBtn = document.getElementById('preset-save-cancel-wizard');
+    const confirmBtn = document.getElementById('preset-save-confirm-wizard');
+
+    // Remove existing listeners and add new ones
+    const newCancelBtn = cancelBtn.cloneNode(true);
+    cancelBtn.parentNode.replaceChild(newCancelBtn, cancelBtn);
+    newCancelBtn.addEventListener('click', () => {
+        modal.style.display = 'none';
+        goToStep(2);
+    });
+
+    // Override confirm to save and then go to Step 2
+    const newConfirmBtn = confirmBtn.cloneNode(true);
+    confirmBtn.parentNode.replaceChild(newConfirmBtn, confirmBtn);
+    newConfirmBtn.addEventListener('click', async () => {
+        await savePreset();
+        // After saving, close modal and go to Step 2
+        setTimeout(() => {
+            goToStep(2);
+        }, 500);
+    });
 }
 
 function displayGatekeeperResults(data) {
@@ -895,7 +976,7 @@ async function analyzePlaylist() {
         // Start simulated detailed progress
         const totalTracks = playlistFiles.length;
         let currentProgress = 40;
-        
+
         // Simulation settings
         const analysisMessages = [
             "Extracting spectral features...",
@@ -906,24 +987,44 @@ async function analyzePlaylist() {
             "Aggregating sonic data...",
             "Finalizing playlist profile..."
         ];
-        
+
+        // Final waiting messages (rotate after reaching 95%)
+        const finalWaitMessages = [
+            "📝 Creating final profile...",
+            "🔬 Gathering full data...",
+            "🎯 Details extraction...",
+            "⏰ Be patient, just a moment...",
+            "🔄 Processing final calculations...",
+            "✨ Finalizing analysis...",
+            "🎼 Compiling results..."
+        ];
+
         // Estimate 2 seconds per track for simulation speed
-        const estimatedDuration = totalTracks * 2000; 
+        const estimatedDuration = totalTracks * 2000;
         const intervalTime = 200;
         const totalSteps = estimatedDuration / intervalTime;
         const progressIncrement = (55 / totalSteps); // Move from 40% to 95%
 
         if (progressModalInterval) clearInterval(progressModalInterval);
-        
+
+        let finalMessageIndex = 0;
         progressModalInterval = setInterval(() => {
             currentProgress += progressIncrement;
-            if (currentProgress > 95) currentProgress = 95; // Cap at 95% until done
+            if (currentProgress > 95) {
+                currentProgress = 95; // Cap at 95%
+
+                // After reaching 95%, rotate through waiting messages
+                const waitMsg = finalWaitMessages[finalMessageIndex % finalWaitMessages.length];
+                updateProgressModal(96 + (finalMessageIndex % 2), waitMsg); // Alternate between 96-97%
+                finalMessageIndex++;
+                return;
+            }
 
             // Calculate which track we are "analyzing" based on progress
             // Map 40-95% to 1-totalTracks
             const progressRatio = (currentProgress - 40) / 55;
             const currentTrackNum = Math.min(Math.ceil(progressRatio * totalTracks), totalTracks);
-            
+
             // Cycle messages
             const msgIndex = Math.floor(progressRatio * analysisMessages.length);
             const detailMsg = analysisMessages[Math.min(msgIndex, analysisMessages.length - 1)];
@@ -1246,7 +1347,19 @@ async function compareTrack() {
         { progress: 96, message: '⏳ Almost complete...' }
     ];
 
+    // Final waiting messages (rotate after reaching 96%)
+    const finalWaitMessages = [
+        '📝 Creating final profile...',
+        '🔬 Gathering full data...',
+        '🎯 Details extraction...',
+        '⏰ Be patient, just a moment...',
+        '🔄 Processing final calculations...',
+        '✨ Finalizing analysis...',
+        '🎼 Compiling results...'
+    ];
+
     let currentStep = 0;
+    let finalMessageIndex = 0;
 
     // Function to update progress
     const updateProgress = () => {
@@ -1254,6 +1367,11 @@ async function compareTrack() {
             const step = progressSteps[currentStep];
             updateProgressModal(step.progress, step.message);
             currentStep++;
+        } else {
+            // After reaching final step (96%), rotate through waiting messages
+            const message = finalWaitMessages[finalMessageIndex % finalWaitMessages.length];
+            updateProgressModal(97 + (finalMessageIndex % 2), message); // Alternate between 97-98%
+            finalMessageIndex++;
         }
     };
 
@@ -1539,6 +1657,14 @@ function goToStep(stepNumber) {
             step.classList.add('completed');
         }
     });
+
+    // If going to Step 2 in AI Mode, ensure parameter selection is hidden
+    if (stepNumber === 2 && analysisMode === 'ai') {
+        const parameterSelection = document.querySelector('.parameter-selection-wizard');
+        if (parameterSelection) {
+            parameterSelection.style.display = 'none';
+        }
+    }
 
     // Scroll to top
     window.scrollTo({ top: 0, behavior: 'smooth' });
