@@ -4,20 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>The Spotify Algorithm - Decode. Match. Dominate.</title>
-    <link rel="stylesheet" href="/static/css/style.css">
+    <link rel="stylesheet" href="/static/css/style.css?v=1765291200">
     <style>
-        /* Landing Page Specific Styles */
-        body {
-            margin: 0;
-            padding: 0;
-            overflow-x: hidden;
-        }
-
-        .landing-container {
-            min-height: 100vh;
-            background: linear-gradient(135deg, #0a0e27 0%, #1a1a2e 50%, #16213e 100%);
-            color: var(--text-primary);
-        }
+        /* Landing Page Specific Styles - Matching Main App Design */
 
         /* Hero Section */
         .hero {
@@ -45,21 +34,22 @@
             margin: 0 auto;
         }
 
-        .hero-logo {
-            font-size: 48px;
-            font-weight: 900;
-            background: linear-gradient(135deg, #1DB954 0%, #1ed760 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
+        .hero-badge {
+            display: inline-block;
+            padding: 8px 20px;
+            background: rgba(29, 185, 84, 0.1);
+            border: 1px solid rgba(29, 185, 84, 0.3);
+            border-radius: 20px;
+            color: var(--primary);
+            font-size: 14px;
+            font-weight: 600;
             margin-bottom: 20px;
-            letter-spacing: 2px;
         }
 
         .hero-tagline {
             font-size: 32px;
             font-weight: 700;
-            color: var(--text-primary);
+            color: var(--text-main);
             margin-bottom: 20px;
             line-height: 1.3;
         }
@@ -69,6 +59,9 @@
             color: var(--text-secondary);
             margin-bottom: 40px;
             line-height: 1.6;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
         }
 
         .hero-cta {
@@ -85,10 +78,11 @@
             font-weight: 700;
             border-radius: var(--radius-lg);
             cursor: pointer;
-            transition: all 0.3s ease;
+            transition: all 0.3s var(--ease-out);
             text-decoration: none;
             display: inline-block;
             border: none;
+            font-family: var(--font-sans);
         }
 
         .cta-primary {
@@ -104,25 +98,14 @@
         }
 
         .cta-secondary {
-            background: rgba(255, 255, 255, 0.05);
-            color: var(--text-primary);
-            border: 2px solid rgba(255, 255, 255, 0.1);
+            background: var(--bg-elevated);
+            color: var(--text-main);
+            border: 1px solid rgba(255, 255, 255, 0.1);
         }
 
         .cta-secondary:hover {
-            background: rgba(255, 255, 255, 0.1);
+            background: var(--bg-input);
             border-color: rgba(255, 255, 255, 0.2);
-        }
-
-        .hero-badge {
-            display: inline-block;
-            padding: 8px 20px;
-            background: rgba(29, 185, 84, 0.15);
-            border: 1px solid rgba(29, 185, 84, 0.3);
-            border-radius: 20px;
-            color: var(--primary);
-            font-size: 14px;
-            font-weight: 600;
         }
 
         /* Features Section */
@@ -135,8 +118,9 @@
             text-align: center;
             font-size: 36px;
             font-weight: 700;
-            color: var(--text-primary);
+            color: var(--text-main);
             margin-bottom: 60px;
+            letter-spacing: -0.02em;
         }
 
         .features-grid {
@@ -152,7 +136,8 @@
             border: 1px solid rgba(255, 255, 255, 0.05);
             border-radius: var(--radius-lg);
             padding: 40px;
-            transition: all 0.3s ease;
+            transition: all 0.3s var(--ease-out);
+            box-shadow: var(--shadow-card);
         }
 
         .feature-card:hover {
@@ -169,7 +154,7 @@
         .feature-title {
             font-size: 22px;
             font-weight: 700;
-            color: var(--text-primary);
+            color: var(--text-main);
             margin-bottom: 15px;
         }
 
@@ -203,7 +188,7 @@
             flex-shrink: 0;
             width: 60px;
             height: 60px;
-            background: linear-gradient(135deg, var(--primary) 0%, #1ed760 100%);
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-hover) 100%);
             border-radius: 50%;
             display: flex;
             align-items: center;
@@ -211,12 +196,14 @@
             font-size: 24px;
             font-weight: 900;
             color: white;
+            box-shadow: var(--glow-primary);
         }
 
         .step-content h3 {
             font-size: 22px;
-            color: var(--text-primary);
+            color: var(--text-main);
             margin-bottom: 10px;
+            font-weight: 700;
         }
 
         .step-content p {
@@ -241,11 +228,12 @@
 
         .mode-card {
             background: var(--bg-surface);
-            border: 2px solid rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.05);
             border-radius: var(--radius-lg);
             padding: 40px;
             position: relative;
             overflow: hidden;
+            box-shadow: var(--shadow-card);
         }
 
         .mode-card.featured {
@@ -268,7 +256,7 @@
         .mode-title {
             font-size: 28px;
             font-weight: 700;
-            color: var(--text-primary);
+            color: var(--text-main);
             margin-bottom: 15px;
         }
 
@@ -291,6 +279,7 @@
             display: flex;
             align-items: center;
             gap: 12px;
+            font-size: 15px;
         }
 
         .mode-features li::before {
@@ -298,6 +287,7 @@
             color: var(--primary);
             font-weight: 900;
             font-size: 18px;
+            flex-shrink: 0;
         }
 
         /* Social Proof */
@@ -321,7 +311,7 @@
         .stat-number {
             font-size: 48px;
             font-weight: 900;
-            background: linear-gradient(135deg, var(--primary) 0%, #1ed760 100%);
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-hover) 100%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
@@ -343,7 +333,7 @@
         .final-cta h2 {
             font-size: 36px;
             font-weight: 700;
-            color: var(--text-primary);
+            color: var(--text-main);
             margin-bottom: 20px;
         }
 
@@ -362,10 +352,70 @@
             font-size: 14px;
         }
 
+        /* Landing Header */
+        .landing-header {
+            padding: 20px 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(18, 18, 18, 0.35);
+            backdrop-filter: blur(40px) saturate(180%);
+            -webkit-backdrop-filter: blur(40px) saturate(180%);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .landing-logo {
+            font-size: 18px;
+            font-weight: 900;
+            color: var(--primary);
+            letter-spacing: 1px;
+        }
+
+        .landing-nav {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+
+        .nav-btn {
+            padding: 10px 20px;
+            font-size: 14px;
+            font-weight: 600;
+            border-radius: var(--radius-md);
+            cursor: pointer;
+            transition: all 0.3s var(--ease-out);
+            text-decoration: none;
+            border: none;
+            background: transparent;
+            color: var(--text-secondary);
+            font-family: var(--font-sans);
+        }
+
+        .nav-btn:hover {
+            color: var(--text-main);
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .nav-btn.primary {
+            background: var(--primary);
+            color: white;
+        }
+
+        .nav-btn.primary:hover {
+            background: var(--primary-hover);
+        }
+
         /* Responsive */
         @media (max-width: 768px) {
-            .hero-logo {
-                font-size: 36px;
+            .hero {
+                padding: 60px 20px 80px;
+            }
+
+            .main-title {
+                font-size: 42px !important;
             }
 
             .hero-tagline {
@@ -396,53 +446,18 @@
             .step-number {
                 margin: 0 auto;
             }
-        }
 
-        /* Simple header for landing */
-        .landing-header {
-            padding: 20px 40px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            background: rgba(0, 0, 0, 0.3);
-            backdrop-filter: blur(10px);
-        }
+            .landing-header {
+                flex-direction: column;
+                gap: 15px;
+                padding: 15px 20px;
+            }
 
-        .landing-logo {
-            font-size: 20px;
-            font-weight: 900;
-            color: var(--primary);
-        }
-
-        .landing-nav {
-            display: flex;
-            gap: 15px;
-        }
-
-        .nav-btn {
-            padding: 10px 20px;
-            font-size: 14px;
-            font-weight: 600;
-            border-radius: var(--radius-md);
-            cursor: pointer;
-            transition: all 0.3s ease;
-            text-decoration: none;
-            border: none;
-            background: transparent;
-            color: var(--text-secondary);
-        }
-
-        .nav-btn:hover {
-            color: var(--text-primary);
-        }
-
-        .nav-btn.primary {
-            background: var(--primary);
-            color: white;
-        }
-
-        .nav-btn.primary:hover {
-            background: var(--primary-hover);
+            .landing-nav {
+                width: 100%;
+                justify-content: center;
+                flex-wrap: wrap;
+            }
         }
     </style>
 </head>
@@ -463,7 +478,7 @@
         <section class="hero">
             <div class="hero-content">
                 <div class="hero-badge">🎵 AI-Powered Audio Analysis</div>
-                <h1 class="hero-logo">THE SPOTIFY ALGORITHM</h1>
+                <h1 class="main-title">THE HIT ALGORITHM</h1>
                 <h2 class="hero-tagline">Decode. Match. Dominate.</h2>
                 <p class="hero-subtitle">
                     Analyze your tracks against Spotify playlists with professional-grade AI.
@@ -595,7 +610,7 @@
             <h2 class="section-title">Choose Your Analysis Mode</h2>
             <div class="modes-grid">
                 <div class="mode-card">
-                    <h3 class="mode-title">🎛️ Standard Mode</h3>
+                    <h3 class="mode-title">📊 Standard Mode</h3>
                     <p class="mode-description">
                         Flexible analysis with full control over which parameters to analyze.
                         Perfect for detailed comparisons and comprehensive reports.
@@ -660,7 +675,7 @@
         <!-- Footer -->
         <footer class="footer">
             <p>&copy; 2024 The Spotify Algorithm. All rights reserved.</p>
-            <p style="margin-top: 10px; opacity: 0.6;">Public Beta v.118 by GR</p>
+            <p style="margin-top: 10px; opacity: 0.6;">Public Beta v.0.47.8 - Created by GRyba</p>
         </footer>
     </div>
 
@@ -680,8 +695,7 @@
                 // User is logged in, redirect to wizard
                 window.location.href = '/wizard';
             } else {
-                // User not logged in, show signup/login modal
-                // For now, just redirect to wizard (since auth is disabled)
+                // User not logged in, redirect to wizard (auth currently disabled)
                 window.location.href = '/wizard';
             }
         }
